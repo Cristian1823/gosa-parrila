@@ -1,0 +1,84 @@
+/* ===== Carta imprimible GOSA (Carta/Letter) =====
+   Hereda la paleta y tipografías de la marca. Dos variantes: negro (marca) y blanco (ahorra tinta). */
+
+.carta { --c-bg: #000; --c-ink: #fff; --c-soft: #e0e0e0; --c-gold: #ffd700; --c-line: #4b4b4b; --c-pill: #2a2a2a; min-height: 100vh; }
+html.carta-light .carta { --c-bg: #fff; --c-ink: #111; --c-soft: #444; --c-gold: #8a6500; --c-line: #bdbdbd; --c-pill: #f0e6c0; }
+
+html.carta-root, html.carta-root body { background: var(--c-bg, #000); }
+html.carta-light, html.carta-light body { background: #fff; color: #111; }
+html.carta-root body::before { display: none; } /* sin marca de agua de pantalla; la hoja trae la suya */
+html.carta-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* --- Barra de pantalla (no se imprime) --- */
+.carta-toolbar { max-width: 8.5in; margin: 0 auto; padding: 20px 16px 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.carta-toolbar .muted { flex-basis: 100%; font-size: 13px; }
+html.carta-light .carta-toolbar .muted { color: #444; }
+
+/* --- Hoja --- */
+.c-sheet { position: relative; width: 100%; max-width: 8.5in; margin: 0 auto; padding: 0.45in 0.5in 0.5in; background: var(--c-bg); color: var(--c-ink); font-family: var(--font-ui); line-height: 1.35; }
+.c-sheet::before { content: ''; position: absolute; inset: 0; background: url('/logo.jpg') center 40% / 60% no-repeat; opacity: 0.04; pointer-events: none; }
+html.carta-light .c-sheet::before { opacity: 0.05; filter: invert(1); }
+.c-sheet > * { position: relative; }
+
+.c-head { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.c-logo { width: 1.25in; height: 1.25in; border-radius: 50%; object-fit: cover; border: 3px solid var(--c-gold); }
+.c-head h1 { font-family: var(--font-display); font-weight: 400; font-size: 58pt; line-height: 0.95; letter-spacing: 8px; color: var(--c-gold); }
+.c-sub { font-size: 11pt; letter-spacing: 3px; color: var(--c-soft); font-weight: 300; }
+.c-title { font-family: var(--font-display); font-weight: 400; font-size: 26pt; letter-spacing: 6px; text-align: center; color: var(--c-gold); margin: 14px 0 8px; }
+
+.c-sec { margin-top: 14px; break-inside: avoid; }
+.c-band {
+  margin: 0 0 8px; height: 0.62in; padding: 0 18px; display: flex; align-items: center; border-radius: 10px;
+  font-family: var(--font-display); font-weight: 400; font-size: 21pt; letter-spacing: 4px; color: #fff;
+  background: linear-gradient(135deg, #333, #111); border: 2px solid var(--c-gold); text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  break-after: avoid;
+}
+.c-band[class*='band-'] { background-size: cover; background-position: center; }
+.band-entradas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-entradas.jpeg'); }
+.band-perros { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-perros.jpeg'); }
+.band-hamburguesas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-hamburguesas.jpeg'); }
+.band-salchipapas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-salchipapas.jpeg'); }
+.band-adicionales { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-adicionales.jpeg'); }
+.band-bebidas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-bebidas.jpeg'); }
+
+.c-note { margin: 0 0 8px; padding: 5px 14px; text-align: center; font-size: 10pt; color: var(--c-ink); border: 2px solid var(--c-gold); border-radius: 30px; background: rgba(255, 215, 0, 0.12); break-after: avoid; }
+.c-note b { color: var(--c-gold); font-family: var(--font-display); font-weight: 400; font-size: 13pt; letter-spacing: 1px; }
+
+/* Dos columnas; cada plato se mantiene entero */
+.c-cols { column-count: 2; column-gap: 0.4in; }
+.c-cols.compact { column-gap: 0.5in; }
+.c-item { position: relative; break-inside: avoid; margin-bottom: 11px; }
+.c-cols.compact .c-item { margin-bottom: 5px; }
+
+.c-line { display: flex; align-items: baseline; gap: 8px; }
+.c-name { font-family: var(--font-display); font-size: 16pt; letter-spacing: 1.5px; line-height: 1.15; color: var(--c-gold); }
+.c-dots { flex: 1; min-width: 12px; border-bottom: 2px dotted var(--c-line); transform: translateY(-3px); }
+.c-price { font-family: var(--font-display); font-size: 14pt; letter-spacing: 1px; color: var(--c-ink); background: var(--c-pill); padding: 0 8px; border-radius: 6px; white-space: nowrap; }
+.c-cols.compact .c-name { font-size: 13pt; color: var(--c-ink); font-family: var(--font-ui); font-weight: 500; letter-spacing: 0; }
+.c-cols.compact .c-price { font-size: 13pt; background: none; padding: 0; color: var(--c-gold); }
+
+.c-desc { margin: 1px 0 3px; font-size: 8.5pt; line-height: 1.32; color: var(--c-soft); }
+.c-var { margin-top: 3px; }
+.c-var .c-name { font-size: 12.5pt; }
+.c-var .c-price { font-size: 12pt; }
+.c-badge {
+  align-self: center; flex: none; transform: rotate(-2deg); padding: 0 7px; border-radius: 4px;
+  background: linear-gradient(135deg, #ffd700, #ffc107); color: #000; font-family: var(--font-display); font-size: 9pt; letter-spacing: 1px;
+}
+
+.c-foot { margin-top: 18px; padding-top: 10px; border-top: 2px solid var(--c-gold); text-align: center; font-size: 9.5pt; color: var(--c-soft); display: flex; flex-direction: column; gap: 2px; break-inside: avoid; }
+
+/* --- Impresión --- */
+@page { size: letter; margin: 0; }
+@media print {
+  .no-print { display: none !important; }
+  html.carta-root, html.carta-root body { margin: 0; }
+  .carta { min-height: 0; }
+  .c-sheet { max-width: none; width: 100%; margin: 0; padding: 0.4in 0.5in; }
+}
+
+@media (max-width: 700px) {
+  .c-head { flex-direction: column; gap: 8px; text-align: center; }
+  .c-head h1 { font-size: 44pt; }
+  .c-cols { column-count: 1; }
+}

@@ -1,0 +1,19 @@
+# Dependencias y entornos
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build y datos locales
+frontend/dist/
+backend/*.db
+backend/*.db-wal
+backend/*.db-shm
+.vscode/
+.claude/
+
+# Sede 1: solo referencia local (videos pesados y CLAUDE.md con PINs)
+gosa food truck/
+
+# Paquete original recibido
+gosa-pos.zip
