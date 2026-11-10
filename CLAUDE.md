@@ -37,7 +37,8 @@ backend/
   menu_seed.py     CARTA (fuente de datos de productos, precios, etiquetas, variantes)
   requirements.txt
 frontend/
-  public/logo.jpg  logo (circular, borde dorado)
+  public/logo.jpg  logo horizontal "GOSA PARRILLA" (recortado); favicon.png = la "G"
+assets/            logo-gosa-parrilla-original.jpeg: el archivo original que entregó el cliente (1536x1024)
   public/images/   fondos de categoría, bebidas.jpeg, vaca.jpeg
   src/main.jsx     rutas
   src/lib.js       api, money, usePolling, slug, groupMenu
@@ -119,7 +120,7 @@ API: `GET /api/menu`, `POST /api/orders`, `GET /api/orders`, `PATCH /api/orders/
 Tokens en `:root` de `src/styles.css`, idénticos a la sede 1:
 - Fondo `#000`, panel `#141414`, dorado `#FFD700` / `#FFC107`, texto `#fff`, gris claro `#E0E0E0`, bordes `#4B4B4B`, éxito `#28a745`, aviso/naranja `#ff6b35`.
 - Tipografías: **Bebas Neue** (títulos, precios, botones) + **Inter** (texto).
-- Logo circular con borde dorado y marca de agua al 5 % de fondo; tarjetas con barrido dorado al hover; etiquetas dorado inclinadas -2°; precios en pastilla gris; botones con gradiente dorado; chips en forma de pastilla.
+- Logo horizontal "GOSA PARRILLA" (dorado sobre negro, sin marco circular) y marca de agua al 5 % de fondo; tarjetas con barrido dorado al hover; etiquetas dorado inclinadas -2°; precios en pastilla gris; botones con gradiente dorado; chips en forma de pastilla.
 - Menú digital: acordeón por categoría con foto de cabecera (90 px, velo oscuro 45 %) y mismos iconos Font Awesome. Perros lleva dos burbujas: "¡ADICIÓN! +$4.000 salchicha americana" y "¡HAZLO COMBO!" (bebida del día $6.500, Coca-Cola $8.000, Postobón $7.500). Platos a la carta usa como cabecera la foto de parrilla (`fondo-platos.jpeg`).
 - Carta impresa: hoja Letter, dos columnas, `break-inside: avoid` por categoría (hoy 3 páginas: Entradas+Perros / Hamburguesas+Salchipapas+Platos a la carta / Adicionales+Bebidas). Requiere "Gráficos de fondo" activado al imprimir.
 
@@ -133,9 +134,9 @@ Tokens en `:root` de `src/styles.css`, idénticos a la sede 1:
 5. **Login/PIN** para `/pos/*` y endpoints de cocina/pago (hoy abiertos; la red del POS debe ser interna).
 6. Sin impuestos (impoconsumo 8 %) ni facturación electrónica por ahora.
 7. Banner de promoción y carrusel de videos del menú de la sede 1: **no traídos** (la promo de noviembre es del truck). Ahumados excluidos.
-8. Marcadores sin completar: `[HORARIO]` y `[DIRECCIÓN DEL LOCAL]` (pie de `Menu.jsx`), `[CAJERO]` (`Bits.jsx`); `INFO` en `Carta.jsx` (horario/dirección vacíos; redes copiadas de la sede 1: @gosa_ft, @gosa.food.truck — confirmar si el local tiene cuentas propias). Título del menú: solo "GOSA" (ya no es truck); confirmar nombre del local.
+8. Marcadores sin completar: `[HORARIO]` y `[DIRECCIÓN DEL LOCAL]` (pie de `Menu.jsx`), `[CAJERO]` (`Bits.jsx`); `INFO` en `Carta.jsx` (horario/dirección vacíos; redes copiadas de la sede 1: @gosa_ft, @gosa.food.truck — confirmar si el local tiene cuentas propias). Nombre del local: **GOSA Parrilla** (según el logo nuevo; el título del menú usa solo el logo y el pie dice "GOSA Parrilla ©").
 9. **Confirmar con el cliente** (valores del PDF dudosos, ya aplicados con una suposición): Queso cheddar adicional `300` → se puso 3.000; Chicharrón adicional `400` → 4.000; nombres `Bucaro` (entrada) vs `Salchi Bucara`; `Gosa Gacuho` (¿Gaucho?); alcance de la nota del combo (se aplicó solo a Perros: el PDF dice "los dos cris"); precios de Bebidas (el PDF no las trae); si Totopos, Tender y 360 Hamburguer salen definitivamente.
-10. **Logo (pendiente de recibir):** el actual dice "GOSA FOOD TRUCK" y el cliente pidió cambiarlo; se deja el actual hasta que llegue el nuevo. **Dónde se cambia:** `frontend/public/logo.jpg` (menú React, carta imprimible, POS local y favicon) y `sede2-sheets/images/logo.jpeg` (menú estático, páginas del sistema, marca de agua de `style.css`, favicon; `build.js` lo copia por nombre). Si el nuevo logo cambia de nombre o formato (p. ej. PNG) hay que actualizar esas referencias: `grep -rn "logo\.jp" frontend sede2-sheets tools build.js`. Después regenerar los PDF de `carta impresa/`.
+10. **Logo — aplicado (nov 2026):** el cliente entregó el logo nuevo "GOSA PARRILLA" (horizontal). El original está en `assets/logo-gosa-parrilla-original.jpeg`; se recortaron sus márgenes negros con Pillow y se guardó como `frontend/public/logo.jpg` y `sede2-sheets/images/logo.jpeg` (mismos nombres que antes, para no tocar referencias). Los estilos del logo ya no lo recortan en círculo ni le ponen borde (`.logo` en `styles.css`, `.c-logo` en `carta.css`, `header img` en `sede2-sheets/style.css`, `.sistema-header .logo` en `sistema.css`, `.logo-pin` en `cierre.html`); el título "GOSA" en texto se quitó del encabezado porque el logo ya lo dice. Favicon: la "G" en `favicon.png`. Para cambiar el logo otra vez: reemplazar esos dos archivos con la misma proporción aproximada (o ajustar esos estilos) y regenerar los PDF de `carta impresa/`.
 11. **Guardar el avance:** hay cambios sin commit (carta nueva del PDF del cliente, categoría Platos a la carta, perros con "salchicha americana", hamburguesas +$1.000, PDFs regenerados). Hacer commit cuando el usuario lo pida. Tip: si un PDF de `carta impresa/` está abierto en un visor, Windows no deja sobrescribirlo; pedir que lo cierren.
 12. Actualizar `README.md` (menciona `?mesa=N` y la carta de ejemplo original).
 

@@ -56,11 +56,8 @@ export default function Carta() {
 
       <article className="c-sheet">
         <header className="c-head">
-          <img src="/logo.jpg" alt="Logo GOSA" className="c-logo" />
-          <div>
-            <h1>GOSA</h1>
-            <p className="c-sub">Comida Gourmet con Actitud</p>
-          </div>
+          <img src="/logo.jpg" alt="GOSA Parrilla" className="c-logo" />
+          <p className="c-sub">Comida Gourmet con Actitud</p>
         </header>
         <h2 className="c-title">NUESTRO MENÚ</h2>
 

@@ -124,4 +124,4 @@ Se copiaron tal cual venían; estos se ven raros: Coca Cola 1.5 L, Coca Cola 0 1
 - Los PIN están en `config.js`, que es visible para quien abra el sitio. Frenan el uso casual, no a una persona con conocimientos técnicos.
 - La URL del backend no pide autenticación: quien la tenga puede leer y modificar pedidos. No la publiques ni la compartas.
 - El número de WhatsApp, el horario y la dirección del local no están definidos: se completan en `tools/generar_sede2.py` (constantes `WHATSAPP`, `HORARIO`, `DIRECCION`) y se regenera.
-- El logo dice "GOSA FOOD TRUCK"; el cliente pidió cambiarlo y falta recibir el nuevo. Se reemplaza en `images/logo.jpeg` (ver CLAUDE.md, sección Logo).
+- El logo es el nuevo "GOSA PARRILLA". Para cambiarlo otra vez, reemplaza `images/logo.jpeg` (y `images/favicon.png`) y vuelve a desplegar (ver CLAUDE.md, punto Logo).

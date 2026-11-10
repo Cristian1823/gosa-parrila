@@ -201,16 +201,15 @@ def index_html(cats):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú GOSA</title>
-    <link rel="icon" href="images/logo.jpeg">
+    <title>Menú GOSA Parrilla</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body>
     <!-- ARCHIVO GENERADO por tools/generar_sede2.py a partir de backend/menu_seed.py. No editar a mano. -->
     <header>
-        <img src="images/logo.jpeg" alt="Logo GOSA">
-        <h1 class="main-title">GOSA</h1>
+        <img src="images/logo.jpeg" alt="GOSA Parrilla">
         <p class="subtitle">Comida Gourmet con Actitud</p>
     </header>
 
@@ -228,7 +227,7 @@ def index_html(cats):
             <a href="https://www.instagram.com/gosa_ft" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
         {info}
-        <p class="footer-text">GOSA © Comida Gourmet con Actitud</p>
+        <p class="footer-text">GOSA Parrilla © Comida Gourmet con Actitud</p>
     </footer>
     {wa}
     <script src="config.js"></script>

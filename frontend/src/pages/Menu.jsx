@@ -26,8 +26,7 @@ export default function Menu() {
   return (
     <div className="menu-page">
       <header className="menu-head">
-        <img className="logo" src="/logo.jpg" alt="Logo GOSA" />
-        <h1>GOSA</h1>
+        <img className="logo" src="/logo.jpg" alt="GOSA Parrilla" />
         <p className="subtitle">Comida Gourmet con Actitud</p>
       </header>
 
@@ -111,7 +110,7 @@ export default function Menu() {
           <a href="https://www.instagram.com/gosa_ft" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i className="fab fa-instagram" /></a>
         </div>
         <p className="info"><span>[HORARIO]</span><span>[DIRECCIÓN DEL LOCAL]</span></p>
-        <p className="footer-text">GOSA © Comida Gourmet con Actitud</p>
+        <p className="footer-text">GOSA Parrilla © Comida Gourmet con Actitud</p>
       </footer>
     </div>
   );
