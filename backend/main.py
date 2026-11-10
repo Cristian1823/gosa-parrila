@@ -52,10 +52,10 @@ def init_db() -> None:
             if col not in cols:  # bases creadas con la versión anterior
                 c.execute(f"ALTER TABLE menu_items ADD COLUMN {col} {ddl}")
         # Versión 1: carta de ejemplo -> se reemplaza por la carta real (order_items guarda nombre y precio, no FK).
-        if c.execute("PRAGMA user_version").fetchone()[0] < 3:
+        if c.execute("PRAGMA user_version").fetchone()[0] < 7:
             c.execute("DELETE FROM menu_items")
             seed_menu(c)
-            c.execute("PRAGMA user_version = 3")
+            c.execute("PRAGMA user_version = 7")
 
 
 def seed_menu(c: sqlite3.Connection) -> None:

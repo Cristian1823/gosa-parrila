@@ -38,6 +38,7 @@ html.carta-light .c-sheet::before { opacity: 0.05; filter: invert(1); }
 .band-perros { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-perros.jpeg'); }
 .band-hamburguesas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-hamburguesas.jpeg'); }
 .band-salchipapas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-salchipapas.jpeg'); }
+.band-platos-a-la-carta { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-platos.jpeg'); }
 .band-adicionales { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-adicionales.jpeg'); }
 .band-bebidas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-bebidas.jpeg'); }
 

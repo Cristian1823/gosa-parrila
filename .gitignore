@@ -12,6 +12,9 @@ backend/*.db-shm
 .vscode/
 .claude/
 
+# Sede 2 (Sheets): config con URL del backend y PIN
+sede2-sheets/config.js
+
 # Sede 1: solo referencia local (videos pesados y CLAUDE.md con PINs)
 gosa food truck/
 

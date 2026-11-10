@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOSA - Ventas del Día</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="sistema.css">
+    <style>
+        .ventas-container { max-width: 900px; margin: 0 auto; padding: 20px 16px 40px; }
+        .ventas-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .ventas-toolbar input[type="date"] {
+            background: var(--card-bg); color: #fff; border: 1px solid var(--gray-dark);
+            border-radius: 8px; padding: 10px 12px; font-family: 'Inter', sans-serif; font-size: 1rem;
+        }
+        .ventas-toolbar button {
+            background: var(--gold); color: #000; border: none; border-radius: 8px;
+            padding: 10px 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .v-card {
+            background: var(--card-bg); border: 1px solid var(--gray-dark);
+            border-radius: 10px; padding: 14px; text-align: center;
+        }
+        .v-card .v-num { font-family: 'Bebas Neue', sans-serif; font-size: 2em; line-height: 1.1; color: var(--gold); }
+        .v-card .v-lbl { font-size: 0.85em; color: var(--gray-light); margin-top: 4px; }
+        .v-card.efectivo .v-num { color: #28a745; }
+        .v-card.qr .v-num { color: #4d9fff; }
+        .v-card.tarjeta .v-num { color: #a77bf0; }
+        .v-card.porcobrar .v-num { color: var(--warning); }
+        .v-sub { font-size: 0.78em; color: var(--gray-light); margin-top: 2px; }
+        h2.v-titulo { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; color: var(--gold); margin: 24px 0 10px; font-weight: normal; }
+        .tabla-wrap { overflow-x: auto; }
+        table.v-tabla { width: 100%; border-collapse: collapse; }
+        table.v-tabla th, table.v-tabla td { padding: 10px 8px; border-bottom: 1px solid var(--gray-dark); text-align: left; }
+        table.v-tabla th { color: var(--gray-light); font-weight: 500; font-size: 0.85em; }
+        table.v-tabla td.num, table.v-tabla th.num { text-align: right; }
+        .v-vacio { text-align: center; color: var(--gray-light); padding: 30px 0; }
+    </style>
+</head>
+<body>
+    <header class="sistema-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="images/logo.jpeg" alt="GOSA Logo" class="logo">
+            <h1><i class="fas fa-receipt"></i> VENTAS DEL DÍA</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="pedidos.html" class="nav-btn">Pedidos</a>
+            <a href="cocina.html" class="nav-btn">Cocina</a>
+            <a href="domicilio.html" class="nav-btn">Para Pago</a>
+            <a href="ventas.html" class="nav-btn active">Ventas</a>
+            <a href="cierre.html" class="nav-btn">Cierre</a>
+            <a href="index.html" class="nav-btn">Menu</a>
+        </nav>
+    </header>
+
+    <div class="ventas-container">
+        <div class="ventas-toolbar">
+            <input type="date" id="fechaVentas">
+            <button onclick="cargarVentas()"><i class="fas fa-rotate"></i> Actualizar</button>
+        </div>
+
+        <div id="contenido"><div class="v-vacio">Cargando ventas...</div></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="menu-data.js"></script>
+    <script src="sistema.js"></script>
+    <script>
+        const METODOS = [
+            { key: 'efectivo', label: 'Efectivo', icono: 'fa-money-bill-wave' },
+            { key: 'qr',       label: 'QR',       icono: 'fa-qrcode' },
+            { key: 'tarjeta',  label: 'Tarjeta',  icono: 'fa-credit-card' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('fechaVentas');
+            input.value = GOSA.fechaHoy();
+            input.addEventListener('change', cargarVentas);
+
+            if (!GOSA.apiConfigurada()) {
+                GOSA.mostrarConfigPendiente(document.getElementById('contenido'));
+                return;
+            }
+            cargarVentas();
+        });
+
+        async function cargarVentas() {
+            const fecha = document.getElementById('fechaVentas').value || GOSA.fechaHoy();
+            const cont = document.getElementById('contenido');
+            cont.innerHTML = '<div class="v-vacio">Cargando ventas...</div>';
+
+            try {
+                const res = await GOSA.getPedidosPorFecha(fecha);
+                if (res.error) throw new Error(res.error);
+                renderizar((res.pedidos || []).filter(p => p.estado !== 'cancelado'));
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = `<div class="mensaje error">Error al cargar: ${e.message}</div>`;
+            }
+        }
+
+        function renderizar(pedidos) {
+            const cont = document.getElementById('contenido');
+
+            if (pedidos.length === 0) {
+                cont.innerHTML = '<div class="v-vacio">No hay ventas en esta fecha</div>';
+                return;
+            }
+
+            const total = pedidos.reduce((s, p) => s + (Number(p.total) || 0), 0);
+            const ticket = Math.round(total / pedidos.length);
+
+            // Cobrados por método; los demás quedan "por cobrar" (o cobrados sin método, ej. antes de este cambio)
+            const porMetodo = {};
+            METODOS.forEach(m => porMetodo[m.key] = { total: 0, n: 0 });
+            const sinMetodo = { total: 0, n: 0 };
+            const porCobrar = { total: 0, n: 0 };
+
+            pedidos.forEach(p => {
+                const v = Number(p.total) || 0;
+                if (p.estado !== 'entregado') {
+                    porCobrar.total += v; porCobrar.n++;
+                } else if (porMetodo[p.metodoPago]) {
+                    porMetodo[p.metodoPago].total += v; porMetodo[p.metodoPago].n++;
+                } else {
+                    sinMetodo.total += v; sinMetodo.n++;
+                }
+            });
+
+            // Productos vendidos
+            const productos = {};
+            pedidos.forEach(p => (p.items || []).forEach(it => {
+                const k = it.nombre;
+                if (!productos[k]) productos[k] = { cantidad: 0, ingreso: 0 };
+                productos[k].cantidad += Number(it.cantidad) || 0;
+                productos[k].ingreso += (Number(it.precio) || 0) * (Number(it.cantidad) || 0);
+            }));
+            const filas = Object.entries(productos).sort((a, b) => b[1].cantidad - a[1].cantidad);
+
+            const card = (cls, num, lbl, sub) => `
+                <div class="v-card ${cls}">
+                    <div class="v-num">${num}</div>
+                    <div class="v-lbl">${lbl}</div>
+                    ${sub ? `<div class="v-sub">${sub}</div>` : ''}
+                </div>`;
+
+            const pedidosTxt = n => `${n} pedido${n === 1 ? '' : 's'}`;
+
+            cont.innerHTML = `
+                <div class="cards-grid">
+                    ${card('', GOSA.formatearPrecio(total), 'Total vendido')}
+                    ${card('', pedidos.length, 'Pedidos')}
+                    ${card('', GOSA.formatearPrecio(ticket), 'Ticket promedio')}
+                </div>
+
+                <h2 class="v-titulo">Cómo pagaron</h2>
+                <div class="cards-grid">
+                    ${METODOS.map(m => card(m.key,
+                        GOSA.formatearPrecio(porMetodo[m.key].total),
+                        `<i class="fas ${m.icono}"></i> ${m.label}`,
+                        pedidosTxt(porMetodo[m.key].n))).join('')}
+                    ${sinMetodo.n ? card('', GOSA.formatearPrecio(sinMetodo.total), 'Cobrado sin método', pedidosTxt(sinMetodo.n)) : ''}
+                    ${card('porcobrar', GOSA.formatearPrecio(porCobrar.total), '<i class="fas fa-hourglass-half"></i> Por cobrar', pedidosTxt(porCobrar.n))}
+                </div>
+
+                <h2 class="v-titulo">Productos vendidos</h2>
+                <div class="tabla-wrap">
+                    <table class="v-tabla">
+                        <thead><tr><th>Producto</th><th class="num">Cant.</th><th class="num">Total</th></tr></thead>
+                        <tbody>
+                            ${filas.map(([nombre, d]) => `
+                                <tr>
+                                    <td>${nombre}</td>
+                                    <td class="num">${d.cantidad}</td>
+                                    <td class="num">${GOSA.formatearPrecio(d.ingreso)}</td>
+                                </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

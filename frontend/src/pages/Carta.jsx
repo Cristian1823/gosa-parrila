@@ -8,7 +8,7 @@ const INFO = {
   direccion: '',
   redes: 'Instagram @gosa_ft  ·  TikTok @gosa.food.truck'
 };
-const BANDS = new Set(['entradas', 'perros', 'hamburguesas', 'salchipapas', 'adicionales', 'bebidas']);
+const BANDS = new Set(['entradas', 'perros', 'hamburguesas', 'salchipapas', 'platos-a-la-carta', 'adicionales', 'bebidas']);
 // Categorías que se listan en una sola línea (nombre ····· precio), sin descripción
 const COMPACT = new Set(['adicionales', 'acompanantes', 'bebidas']);
 
@@ -68,7 +68,10 @@ export default function Carta() {
           <section key={s.id} className="c-sec">
             <h3 className={'c-band' + (BANDS.has(s.id) ? ' band-' + s.id : '')}>{s.title.toUpperCase()}</h3>
             {s.id === 'perros' && (
-              <p className="c-note"><b>¡ADICIÓN!</b> Por solo <b>+$2.500</b> disfruta tu perro con salchicha americana Zenú</p>
+              <>
+                <p className="c-note"><b>¡ADICIÓN!</b> Por solo <b>+$5.000</b> disfruta tu perro con salchicha americana</p>
+                <p className="c-note"><b>¡HAZLO COMBO!</b> Con la bebida del día por solo <b>$6.500</b> · con un producto Coca-Cola <b>$8.000</b> · con uno Postobón <b>$7.500</b></p>
+              </>
             )}
             <div className={'c-cols' + (COMPACT.has(s.id) ? ' compact' : '')}>
               {s.list.map((i) =>

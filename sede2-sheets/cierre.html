@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOSA - Cierre de Caja</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="sistema.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .btn-imprimir {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 8px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-imprimir:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .cierre-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .pedidos-lista {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--gray-dark);
+            margin-top: 25px;
+        }
+
+        .pedidos-lista h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .pedido-row {
+            display: grid;
+            grid-template-columns: 80px 100px 1fr 120px 100px;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-dark);
+            align-items: center;
+        }
+
+        .pedido-row:last-child {
+            border-bottom: none;
+        }
+
+        .pedido-row.header {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--gold);
+            font-size: 1.1em;
+        }
+
+        .pedido-items-mini {
+            font-size: 0.9em;
+            color: var(--gray-light);
+        }
+
+        .estado-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            text-align: center;
+            font-family: 'Bebas Neue', sans-serif;
+        }
+
+        .estado-badge.entregado,
+        .estado-badge.listo {
+            background: rgba(40, 167, 69, 0.3);
+            color: #28a745;
+        }
+
+        .estado-badge.pendiente {
+            background: rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+        }
+
+        .estado-badge.preparando {
+            background: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        .estado-badge.cancelado {
+            background: rgba(108, 117, 125, 0.3);
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .pedido-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .pedido-row.header {
+                display: none;
+            }
+
+            .pedido-row > div::before {
+                font-family: 'Bebas Neue', sans-serif;
+                color: var(--gold);
+                margin-right: 10px;
+            }
+
+            .pedido-row > div:nth-child(1)::before { content: 'Pedido: '; }
+            .pedido-row > div:nth-child(2)::before { content: 'Hora: '; }
+            .pedido-row > div:nth-child(3)::before { content: 'Items: '; }
+            .pedido-row > div:nth-child(4)::before { content: 'Total: '; }
+        }
+
+        @media print {
+            .pedido-row {
+                grid-template-columns: 60px 80px 1fr 100px 80px;
+            }
+        }
+
+        /* ===== SUELDOS DEL DÍA ===== */
+        .sueldos-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 107, 53, 0.4);
+            margin-top: 25px;
+        }
+
+        .sueldos-section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            color: #ff6b35;
+            margin-bottom: 15px;
+        }
+
+        .sueldo-form {
+            display: grid;
+            grid-template-columns: 1fr 140px 1fr auto;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .sueldo-form input {
+            padding: 10px 12px;
+            background: rgba(30,30,30,0.9);
+            border: 1px solid var(--gray-dark);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .sueldo-form input:focus { border-color: #ff6b35; }
+
+        .btn-agregar-sueldo {
+            padding: 10px 18px;
+            background: #ff6b35;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-agregar-sueldo:hover { background: #e55a25; }
+        .btn-agregar-sueldo:disabled { background: #555; cursor: default; }
+
+        .sueldo-form select {
+            padding: 10px 12px;
+            background: rgba(30,30,30,0.9);
+            border: 1px solid var(--gray-dark);
+            border-radius: 8px;
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23FFD700' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .sueldo-form select:focus { border-color: #ff6b35; }
+
+        .sueldo-form select option { background: #1a1a1a; color: var(--white); }
+        .sueldo-form select option.nuevo-empleado { color: #ff6b35; font-style: italic; }
+
+        .sueldos-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sueldo-row {
+            display: grid;
+            grid-template-columns: 1fr 120px auto auto;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255,107,53,0.07);
+            border: 1px solid rgba(255,107,53,0.2);
+            border-radius: 8px;
+        }
+
+        .sueldo-nombre { font-weight: 500; }
+        .sueldo-valor  { color: #ff6b35; font-weight: 600; text-align: right; }
+        .sueldo-nota   { color: var(--gray-light); font-size: 0.85em; font-style: italic; }
+
+        .btn-del-sueldo {
+            background: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            border-radius: 6px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .btn-del-sueldo:hover { background: #dc3545; color: #fff; }
+
+        .sueldos-total {
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: rgba(255,107,53,0.15);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            color: #ff6b35;
+        }
+
+        @media (max-width: 600px) {
+            .sueldo-form { grid-template-columns: 1fr 1fr; }
+            .sueldo-form input:nth-child(3) { grid-column: 1 / -1; }
+            .sueldo-row { grid-template-columns: 1fr auto; }
+            .sueldo-nota { display: none; }
+        }
+
+        /* ===== REPORTE MENSUAL ===== */
+        .reporte-mensual {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid var(--gold);
+            margin-top: 35px;
+        }
+
+        .reporte-mensual-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .reporte-mensual-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6em;
+            color: var(--gold);
+            margin: 0;
+        }
+
+        .reporte-mensual-header .mes-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .producto-estrella {
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,193,7,0.08));
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .producto-estrella .estrella-icono {
+            font-size: 2.2em;
+            line-height: 1;
+        }
+
+        .producto-estrella .estrella-info .estrella-titulo {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--gray-light);
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .producto-estrella .estrella-info .estrella-nombre {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--gold);
+            font-size: 1.6em;
+            line-height: 1.1;
+        }
+
+        .producto-estrella .estrella-info .estrella-stats {
+            font-size: 0.9em;
+            color: var(--gray-light);
+            margin-top: 3px;
+        }
+
+        .dias-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .dias-tabla thead tr {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
+        }
+
+        .dias-tabla th, .dias-tabla td {
+            padding: 9px 12px;
+            text-align: left;
+        }
+
+        .dias-tabla td:not(:first-child) {
+            text-align: right;
+        }
+
+        .dias-tabla th:not(:first-child) {
+            text-align: right;
+        }
+
+        .dias-tabla tbody tr {
+            border-bottom: 1px solid var(--gray-dark);
+            transition: background 0.15s;
+        }
+
+        .dias-tabla tbody tr:hover {
+            background: rgba(255,215,0,0.05);
+        }
+
+        .dias-tabla tfoot tr {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            border-top: 2px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .dias-tabla .ganancia-positiva { color: #28a745; font-weight: 600; }
+
+        @media (max-width: 600px) {
+            .dias-tabla { font-size: 0.8em; }
+            .dias-tabla th, .dias-tabla td { padding: 7px 6px; }
+        }
+
+        .grafica-container {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--gray-dark);
+            border-radius: 12px;
+            padding: 20px 16px 12px;
+            margin: 20px 0;
+        }
+
+        .grafica-titulo {
+            font-family: 'Bebas Neue', sans-serif;
+            color: var(--gold);
+            font-size: 1.2em;
+            margin-bottom: 14px;
+        }
+
+        /* ===== TOGGLE LÍNEA DE NEGOCIO ===== */
+        .linea-toggle {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 18px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .linea-btn {
+            flex: 1;
+            padding: 10px 8px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--gray-light);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1em;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .linea-btn.active {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .linea-btn:hover:not(.active) {
+            background: rgba(255,215,0,0.1);
+            color: var(--gold);
+        }
+
+        /* ===== BADGE LÍNEA EN SUELDOS ===== */
+        .linea-badge-gosa {
+            font-size: 0.72em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-family: 'Bebas Neue', sans-serif;
+            background: rgba(255,215,0,0.15);
+            color: var(--gold);
+        }
+
+        .linea-badge-ahumados {
+            font-size: 0.72em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-family: 'Bebas Neue', sans-serif;
+            background: rgba(255,107,53,0.2);
+            color: #ff6b35;
+        }
+
+        /* PIN Screen */
+        .pin-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--black);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .pin-screen.oculto {
+            display: none;
+        }
+
+        .pin-screen .logo-pin {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+        }
+
+        .pin-screen h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .pin-screen p {
+            color: var(--gray-light);
+            font-size: 0.95em;
+        }
+
+        .pin-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .pin-input input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2em;
+            background: rgba(30, 30, 30, 0.9);
+            border: 2px solid var(--gray-dark);
+            border-radius: 10px;
+            color: var(--gold);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .pin-input input:focus {
+            border-color: var(--gold);
+        }
+
+        .pin-error {
+            color: var(--danger);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            min-height: 1.5em;
+        }
+
+        .pin-input.shake {
+            animation: pin-shake 0.4s ease;
+        }
+
+        @keyframes pin-shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- PIN Screen -->
+    <div class="pin-screen" id="pinScreen">
+        <img src="images/logo.jpeg" alt="GOSA Logo" class="logo-pin">
+        <h2><i class="fas fa-lock"></i> CIERRE DE CAJA</h2>
+        <p>Ingresa el PIN para acceder</p>
+        <div class="pin-input" id="pinInput">
+            <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+            <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+            <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+            <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off">
+        </div>
+        <div class="pin-error" id="pinError"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="sistema-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="images/logo.jpeg"alt="GOSA Logo" class="logo">
+            <h1><i class="fas fa-cash-register"></i> CIERRE DE CAJA</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="pedidos.html" class="nav-btn">Pedidos</a>
+            <a href="cocina.html" class="nav-btn">Cocina</a>
+            <a href="domicilio.html" class="nav-btn">Para Pago</a>
+            <a href="ventas.html" class="nav-btn">Ventas</a>
+            <a href="cierre.html" class="nav-btn active">Cierre</a>
+            <a href="index.html" class="nav-btn">Menu</a>
+        </nav>
+    </header>
+
+    <!-- Contenido -->
+    <div class="cierre-container">
+        <!-- Selector de fecha -->
+        <div class="cierre-header">
+            <div class="cierre-fecha">
+                <label for="fechaConsulta">Fecha:</label>
+                <input type="date" id="fechaConsulta">
+                <button class="btn-consultar" onclick="consultarDia()">
+                    <i class="fas fa-search"></i> Consultar
+                </button>
+                <button class="btn-consultar" onclick="verTodos()" style="background: var(--gold); color: var(--black);">
+                    <i class="fas fa-list"></i> Ver Todos
+                </button>
+            </div>
+            <button class="btn-imprimir" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+
+        <!-- Título de fecha -->
+        <h2 id="tituloFecha" style="font-family: 'Bebas Neue'; color: var(--gold); margin-bottom: 20px;"></h2>
+
+        <!-- Toggle línea de negocio -->
+        <div class="linea-toggle" id="lineaToggle" style="display:none;">
+            <button class="linea-btn active" onclick="cambiarLinea('total')">
+                <i class="fas fa-layer-group"></i> TOTAL
+            </button>
+            <button class="linea-btn" onclick="cambiarLinea('gosa')">
+                🍔 GOSA
+            </button>
+            <button class="linea-btn" onclick="cambiarLinea('ahumados')">
+                🔥 AHUMADOS
+            </button>
+        </div>
+
+        <!-- Resumen -->
+        <div class="resumen-cards" id="resumenCards">
+            <!-- Se llena con JavaScript -->
+        </div>
+
+        <!-- Productos Vendidos -->
+        <div class="productos-vendidos" id="productosVendidos">
+            <h2><i class="fas fa-chart-bar"></i> Productos Vendidos</h2>
+            <div id="tablaProductos">
+                <p class="sin-datos">Selecciona una fecha para ver el resumen</p>
+            </div>
+        </div>
+
+        <!-- Lista de Pedidos -->
+        <div class="pedidos-lista" id="pedidosLista" style="display: none;">
+            <h2><i class="fas fa-list"></i> Detalle de Pedidos</h2>
+            <div id="listaPedidos"></div>
+        </div>
+
+        <!-- Sueldos del Día -->
+        <div class="sueldos-section" id="sueldosSection" style="display:none;">
+            <h2><i class="fas fa-user-clock"></i> Sueldos del Día</h2>
+            <div class="sueldo-form">
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    <select id="sueldoNombreSelect" onchange="onCambioEmpleado(this)">
+                        <option value="">-- Seleccionar empleado --</option>
+                        <option value="__nuevo__" class="nuevo-empleado">➕ Nuevo empleado...</option>
+                    </select>
+                    <input type="text" id="sueldoNombreNuevo" placeholder="Escribe el nombre" style="display:none;">
+                    <select id="sueldoLinea" style="display:none;">
+                        <option value="gosa">🍔 Gosa</option>
+                    </select>
+                </div>
+                <input type="number" id="sueldoValor"  placeholder="$ Valor pagado" min="0">
+                <input type="text"   id="sueldoNota"   placeholder="Nota (opcional)">
+                <button class="btn-agregar-sueldo" id="btnAgregarSueldo" onclick="agregarSueldo()">
+                    <i class="fas fa-plus"></i> Agregar
+                </button>
+            </div>
+            <div class="sueldos-lista" id="sueldosLista"></div>
+            <div class="sueldos-total" id="sueldosTotalDia" style="display:none;">
+                <span><i class="fas fa-coins"></i> Total Sueldos del Día</span>
+                <span id="sueldosTotalValor">$0</span>
+            </div>
+        </div>
+
+        <!-- Reporte Mensual -->
+        <div class="reporte-mensual">
+            <div class="reporte-mensual-header">
+                <h2><i class="fas fa-calendar-alt"></i> Reporte Mensual</h2>
+                <div class="mes-controls">
+                    <input type="month" id="mesConsulta" class="cierre-fecha" style="padding: 8px 12px; border-radius: 8px; background: rgba(30,30,30,0.9); border: 1px solid var(--gray-dark); color: var(--white); font-family: 'Inter', sans-serif;">
+                    <button class="btn-consultar" onclick="consultarMes()">
+                        <i class="fas fa-chart-line"></i> Ver Reporte
+                    </button>
+                    <button class="btn-consultar" onclick="refrescarMes()" title="Forzar actualización desde Sheets" style="background:transparent;border:1px solid var(--gray-dark);color:var(--gray-light);">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards resumen mensual -->
+            <div class="resumen-cards" id="resumenMensualCards" style="display:none;"></div>
+
+            <!-- Producto estrella -->
+            <div id="productoEstrellaCard" style="display:none;"></div>
+
+            <!-- Gráfica por día -->
+            <div id="graficaDiasMes" style="display:none;" class="grafica-container">
+                <div class="grafica-titulo"><i class="fas fa-chart-bar"></i> Ventas vs Ganancia por Día</div>
+                <canvas id="chartDias" height="120"></canvas>
+            </div>
+
+            <!-- Tabla por día -->
+            <div id="tablaDiasMes" style="display:none;">
+                <h3 style="font-family:'Bebas Neue'; color:var(--gold); font-size:1.2em; margin-bottom:10px;">
+                    <i class="fas fa-calendar-day"></i> Detalle por Día
+                </h3>
+                <div id="contenidoDiasMes"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="menu-data.js"></script>
+    <script src="sistema.js"></script>
+    <script>
+        // ========== PIN DE ACCESO ==========
+        // El PIN se define en config.js (GOSA_CONFIG.PIN_CIERRE)
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar inputs del PIN
+            const pinInputs = document.querySelectorAll('#pinInput input');
+            pinInputs[0].focus();
+
+            pinInputs.forEach((input, index) => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value && index < pinInputs.length - 1) {
+                        pinInputs[index + 1].focus();
+                    }
+                    // Verificar PIN cuando se llenen todos
+                    if (index === pinInputs.length - 1 && this.value) {
+                        verificarPin();
+                    }
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && index > 0) {
+                        pinInputs[index - 1].focus();
+                    }
+                });
+            });
+        });
+
+        function verificarPin() {
+            const pinInputs = document.querySelectorAll('#pinInput input');
+            const pin = Array.from(pinInputs).map(i => i.value).join('');
+
+            if (GOSA_CONFIG.pinOk('cierre', pin)) {
+                document.getElementById('pinScreen').classList.add('oculto');
+                inicializarCierre();
+            } else {
+                document.getElementById('pinError').textContent = 'PIN incorrecto';
+                document.getElementById('pinInput').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('pinInput').classList.remove('shake');
+                    pinInputs.forEach(i => i.value = '');
+                    pinInputs[0].focus();
+                }, 400);
+            }
+        }
+
+        // Catálogo de costos para cálculos client-side (verTodos)
+        let catalogoCostos = {};
+
+        // ===== ESTADO LÍNEA DE NEGOCIO =====
+        let lineaActiva    = 'total';
+        let resumenPorLinea = null;
+        let sueldosTodos   = [];
+
+        // ========== CAMBIAR LÍNEA ==========
+        function cambiarLinea(linea) {
+            lineaActiva = linea;
+            document.querySelectorAll('.linea-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${linea}'`));
+            });
+            if (resumenPorLinea) {
+                const vista = resumenPorLinea[linea] || resumenPorLinea.total;
+                renderizarResumen(vista);
+                renderizarProductos(vista.productos);
+            }
+            renderizarSueldosFiltrados(linea);
+        }
+
+        // ========== INICIALIZACIÓN ==========
+        async function inicializarCierre() {
+            // Verificar configuración
+            if (!GOSA.apiConfigurada()) {
+                GOSA.mostrarConfigPendiente(document.querySelector('.cierre-container'));
+                return;
+            }
+
+            // Cargar catálogo de costos desde Sheets
+            try {
+                const result = await GOSA.getProductos();
+                if (result.productos) {
+                    result.productos.forEach(p => {
+                        catalogoCostos[p.nombre.trim().toUpperCase()] = {
+                            costo: p.costo,
+                            gastoOperativo: p.gastoOperativo
+                        };
+                    });
+                }
+            } catch(e) {
+                console.warn('No se pudo cargar catálogo de costos:', e);
+            }
+
+            // Establecer fecha de hoy
+            document.getElementById('fechaConsulta').value = GOSA.fechaHoy();
+
+            // Preseleccionar mes actual en el reporte mensual
+            const hoy = GOSA.fechaHoy(); // YYYY-MM-DD
+            document.getElementById('mesConsulta').value = hoy.substring(0, 7); // YYYY-MM
+
+            // Cargar lista de empleados para el desplegable de sueldos
+            cargarEmpleados();
+
+            // Consultar automáticamente - día actual
+            consultarDia();
+        }
+
+        // Helper: obtener info de costo de un producto por nombre
+        function getCostoProducto(nombre) {
+            const key = nombre.trim().toUpperCase();
+            // Busqueda exacta
+            if (catalogoCostos[key]) return catalogoCostos[key];
+            // Si tiene ":" puede ser combo del mes con composicion
+            if (key.includes(':')) {
+                const base = key.split(':')[0].trim();
+                const composicion = key.split(':')[1].trim();
+                // Combo del mes: sumar costos de los productos seleccionados
+                if (base.includes('COMBO DEL MES') && composicion) {
+                    const subProductos = composicion.split('+');
+                    let costoTotal = 0, gastoTotal = 0;
+                    subProductos.forEach(sub => {
+                        const subInfo = catalogoCostos[sub.trim().toUpperCase()] || { costo: 0, gastoOperativo: 0 };
+                        costoTotal += subInfo.costo;
+                        gastoTotal += subInfo.gastoOperativo;
+                    });
+                    return { costo: costoTotal, gastoOperativo: gastoTotal };
+                }
+                // Otro producto con variante: buscar por nombre base
+                return catalogoCostos[base] || { costo: 0, gastoOperativo: 0 };
+            }
+            return { costo: 0, gastoOperativo: 0 };
+        }
+
+        // ========== VER TODOS LOS PEDIDOS ==========
+        async function verTodos() {
+            document.getElementById('resumenCards').innerHTML = '<div class="loading">Consultando</div>';
+            document.getElementById('tablaProductos').innerHTML = '';
+            document.getElementById('pedidosLista').style.display = 'none';
+
+            try {
+                const resultado = await GOSA.getPedidosHoy();
+
+                if (resultado.error) {
+                    throw new Error(resultado.error);
+                }
+
+                const pedidos = resultado.pedidos || [];
+
+                // Calcular resumen manualmente con costos
+                let totalVentas = 0;
+                let totalCosto = 0;
+                let totalGastoOp = 0;
+                let productosCantidad = {};
+                let productosIngreso = {};
+                let productosCosto = {};
+                let productosGastoOp = {};
+
+                pedidos.forEach(p => {
+                    if (p.estado !== 'cancelado') {
+                        totalVentas += p.total;
+                        p.items.forEach(item => {
+                            const info = getCostoProducto(item.nombre);
+                            if (!productosCantidad[item.nombre]) {
+                                productosCantidad[item.nombre] = 0;
+                                productosIngreso[item.nombre] = 0;
+                                productosCosto[item.nombre] = 0;
+                                productosGastoOp[item.nombre] = 0;
+                            }
+                            productosCantidad[item.nombre] += item.cantidad;
+                            productosIngreso[item.nombre] += item.precio * item.cantidad;
+                            productosCosto[item.nombre] += info.costo * item.cantidad;
+                            productosGastoOp[item.nombre] += info.gastoOperativo * item.cantidad;
+                            totalCosto += info.costo * item.cantidad;
+                            totalGastoOp += info.gastoOperativo * item.cantidad;
+                        });
+                    }
+                });
+
+                const productos = Object.keys(productosCantidad).map(nombre => {
+                    const ing = productosIngreso[nombre];
+                    const cos = productosCosto[nombre];
+                    const gop = productosGastoOp[nombre];
+                    return {
+                        nombre, cantidad: productosCantidad[nombre],
+                        ingreso: ing, costo: cos, gastoOperativo: gop,
+                        gananciaNeta: ing - cos
+                    };
+                }).sort((a, b) => b.cantidad - a.cantidad);
+
+                const resumen = {
+                    totalVentas, totalCosto, totalGastoOp,
+                    gananciaNeta: totalVentas - totalCosto,
+                    cantidadPedidos: pedidos.length,
+                    ticketPromedio: pedidos.length > 0 ? Math.round(totalVentas / pedidos.length) : 0,
+                    productos
+                };
+
+                document.getElementById('tituloFecha').textContent = 'Todos los Pedidos';
+
+                renderizarResumen(resumen);
+                renderizarProductos(resumen.productos);
+                renderizarPedidos(pedidos);
+
+            } catch (error) {
+                console.error('Error consultando:', error);
+                document.getElementById('resumenCards').innerHTML = `
+                    <div class="mensaje error">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // ========== CONSULTAR DÍA ==========
+        async function consultarDia() {
+            const fecha = document.getElementById('fechaConsulta').value;
+
+            if (!fecha) {
+                alert('Selecciona una fecha');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('resumenCards').innerHTML = '<div class="loading">Consultando</div>';
+            document.getElementById('tablaProductos').innerHTML = '';
+            document.getElementById('pedidosLista').style.display = 'none';
+
+            try {
+                // Obtener resumen
+                const resumen = await GOSA.getResumenDia(fecha);
+
+                if (resumen.error) {
+                    throw new Error(resumen.error);
+                }
+
+                // Obtener pedidos del día
+                const pedidos = await GOSA.getPedidosPorFecha(fecha);
+
+                // Guardar resumen por línea y mostrar toggle
+                resumenPorLinea = {
+                    total:    Object.assign({}, resumen.total, { cantidadPedidos: resumen.cantidadPedidos, ticketPromedio: resumen.ticketPromedio }),
+                    gosa:     resumen.gosa,
+                    ahumados: resumen.ahumados
+                };
+                // Sede 2: una sola línea de negocio, el selector TOTAL/GOSA/AHUMADOS se mantiene oculto
+
+                // Mostrar título
+                document.getElementById('tituloFecha').textContent = GOSA.formatearFecha(fecha);
+
+                // Renderizar con línea activa
+                const vistaActual = resumenPorLinea[lineaActiva] || resumenPorLinea.total;
+                renderizarResumen(vistaActual);
+                renderizarProductos(vistaActual.productos);
+
+                // Renderizar lista de pedidos
+                renderizarPedidos(pedidos.pedidos || []);
+
+                // Cargar sueldos del día
+                await cargarSueldosDia(fecha);
+
+            } catch (error) {
+                console.error('Error consultando:', error);
+                document.getElementById('resumenCards').innerHTML = `
+                    <div class="mensaje error">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        // ========== EMPLEADOS (DESPLEGABLE) ==========
+        async function cargarEmpleados() {
+            const select = document.getElementById('sueldoNombreSelect');
+            const optVacio = select.options[0];
+            const optNuevo = Array.from(select.options).find(o => o.value === '__nuevo__')
+                || (() => {
+                    const o = document.createElement('option');
+                    o.value = '__nuevo__';
+                    o.className = 'nuevo-empleado';
+                    o.textContent = '➕ Nuevo empleado...';
+                    return o;
+                })();
+            try {
+                const res = await GOSA.getEmpleados();
+                const empleados = res.empleados || [];
+                select.innerHTML = '';
+                select.appendChild(optVacio);
+                empleados.forEach(nombre => {
+                    const opt = document.createElement('option');
+                    opt.value = nombre;
+                    opt.textContent = nombre;
+                    select.appendChild(opt);
+                });
+                select.appendChild(optNuevo);
+            } catch(e) {
+                console.error('Error cargando empleados:', e);
+                // Restaurar opciones mínimas si falla
+                select.innerHTML = '';
+                select.appendChild(optVacio);
+                select.appendChild(optNuevo);
+            }
+        }
+
+        function _actualizarSelectEmpleados(empleados) {
+            const select   = document.getElementById('sueldoNombreSelect');
+            const optVacio = select.options[0];
+            // Guardar opción "Nuevo" (última)
+            const optNuevo = Array.from(select.options).find(o => o.value === '__nuevo__');
+            select.innerHTML = '';
+            select.appendChild(optVacio);
+            (empleados || []).forEach(nombre => {
+                const opt = document.createElement('option');
+                opt.value = nombre;
+                opt.textContent = nombre;
+                select.appendChild(opt);
+            });
+            if (optNuevo) select.appendChild(optNuevo);
+        }
+
+        function onCambioEmpleado(select) {
+            const inputNuevo = document.getElementById('sueldoNombreNuevo');
+            if (select.value === '__nuevo__') {
+                inputNuevo.style.display = 'block';
+                inputNuevo.focus();
+            } else {
+                inputNuevo.style.display = 'none';
+                inputNuevo.value = '';
+            }
+        }
+
+        // ========== SUELDOS DEL DÍA ==========
+        let _fechaSueldosActual = '';
+
+        async function cargarSueldosDia(fecha) {
+            _fechaSueldosActual = fecha;
+            const section = document.getElementById('sueldosSection');
+            section.style.display = 'block';
+            document.getElementById('sueldosLista').innerHTML = '<div class="loading" style="font-size:0.9em">Cargando sueldos...</div>';
+
+            try {
+                const res = await GOSA.getSueldosPorFecha(fecha);
+                sueldosTodos = res.sueldos || [];
+
+                // Complementar dropdown con nombres de sueldos del día (fallback si getEmpleados falla)
+                if (sueldosTodos.length > 0) {
+                    const select = document.getElementById('sueldoNombreSelect');
+                    const yaEnSelect = new Set(Array.from(select.options).map(o => o.value));
+                    sueldosTodos.forEach(s => {
+                        if (s.nombre && !yaEnSelect.has(s.nombre)) {
+                            const optNuevo = Array.from(select.options).find(o => o.value === '__nuevo__');
+                            const opt = document.createElement('option');
+                            opt.value = s.nombre;
+                            opt.textContent = s.nombre;
+                            if (optNuevo) select.insertBefore(opt, optNuevo);
+                            else select.appendChild(opt);
+                            yaEnSelect.add(s.nombre);
+                        }
+                    });
+                }
+
+                renderizarSueldosFiltrados(lineaActiva);
+            } catch(e) {
+                document.getElementById('sueldosLista').innerHTML = '<p style="color:var(--gray-light);font-size:0.9em">No se pudieron cargar los sueldos</p>';
+            }
+        }
+
+        function renderizarSueldosFiltrados(linea) {
+            const filtrados = linea === 'total'
+                ? sueldosTodos
+                : sueldosTodos.filter(s => s.linea === linea);
+            const total = filtrados.reduce((sum, s) => sum + s.valor, 0);
+            renderizarSueldos(filtrados, total);
+        }
+
+        function renderizarSueldos(sueldos, total) {
+            const lista = document.getElementById('sueldosLista');
+            const totalEl = document.getElementById('sueldosTotalDia');
+            const totalValorEl = document.getElementById('sueldosTotalValor');
+
+            if (sueldos.length === 0) {
+                lista.innerHTML = '<p style="color:var(--gray-light);font-size:0.9em;padding:8px 0">Sin sueldos registrados para este día</p>';
+                totalEl.style.display = 'none';
+                return;
+            }
+
+            lista.innerHTML = sueldos.map(s => `
+                <div class="sueldo-row">
+                    <div>
+                        <div class="sueldo-nombre">${s.nombre}</div>
+                        <div style="display:flex;gap:6px;align-items:center;margin-top:3px;flex-wrap:wrap;">
+                            <span class="${s.linea === 'ahumados' ? 'linea-badge-ahumados' : 'linea-badge-gosa'}">
+                                ${s.linea === 'ahumados' ? '🔥 Ahumados' : '🍔 Gosa'}
+                            </span>
+                            ${s.nota ? `<span class="sueldo-nota">${s.nota}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="sueldo-valor">${GOSA.formatearPrecio(s.valor)}</div>
+                    <div></div>
+                    <button class="btn-del-sueldo" onclick="eliminarSueldoLocal('${s.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            totalEl.style.display = 'flex';
+            totalValorEl.textContent = GOSA.formatearPrecio(total);
+        }
+
+        async function agregarSueldo() {
+            const select     = document.getElementById('sueldoNombreSelect');
+            const inputNuevo = document.getElementById('sueldoNombreNuevo');
+            const esNuevo    = select.value === '__nuevo__';
+            const nombre     = esNuevo ? inputNuevo.value.trim() : select.value.trim();
+            const valor      = parseFloat(document.getElementById('sueldoValor').value);
+            const nota       = document.getElementById('sueldoNota').value.trim();
+
+            if (!nombre) { alert(esNuevo ? 'Escribe el nombre del nuevo empleado' : 'Selecciona un empleado'); return; }
+            if (!valor || valor <= 0) { alert('Ingresa un valor válido'); return; }
+            if (!_fechaSueldosActual) { alert('Consulta un día primero'); return; }
+
+            const linea = document.getElementById('sueldoLinea').value || 'gosa';
+
+            const btn = document.getElementById('btnAgregarSueldo');
+            btn.disabled = true;
+            btn.innerHTML = 'Guardando...';
+
+            try {
+                const res = await GOSA.registrarSueldo(_fechaSueldosActual, nombre, valor, nota, linea);
+                if (res.error) throw new Error(res.error);
+
+                // Limpiar campos
+                select.value = '';
+                inputNuevo.value = '';
+                inputNuevo.style.display = 'none';
+                document.getElementById('sueldoValor').value = '';
+                document.getElementById('sueldoNota').value  = '';
+
+                // Si era nuevo empleado, recargar el desplegable para que aparezca
+                if (esNuevo) await cargarEmpleados();
+
+                // Invalidar caché del mes al que pertenece este sueldo
+                _invalidarCacheMes(_fechaSueldosActual.substring(0, 7));
+
+                // Recargar lista de sueldos del día
+                await cargarSueldosDia(_fechaSueldosActual);
+            } catch(e) {
+                alert('Error al guardar: ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> Agregar';
+            }
+        }
+
+        async function eliminarSueldoLocal(id) {
+            if (!confirm('¿Eliminar este registro de sueldo?')) return;
+            try {
+                const res = await GOSA.eliminarSueldo(id);
+                if (res.error) throw new Error(res.error);
+                _invalidarCacheMes(_fechaSueldosActual.substring(0, 7));
+                sueldosTodos = sueldosTodos.filter(s => s.id !== String(id));
+                renderizarSueldosFiltrados(lineaActiva);
+            } catch(e) {
+                alert('Error al eliminar: ' + e.message);
+            }
+        }
+
+        // ========== RENDERIZAR RESUMEN ==========
+        function renderizarResumen(resumen) {
+            const container = document.getElementById('resumenCards');
+            const tieneCostos = resumen.gananciaNeta !== undefined && resumen.totalCosto !== undefined;
+
+            container.innerHTML = `
+                <div class="resumen-card">
+                    <div class="resumen-valor">${GOSA.formatearPrecio(resumen.totalVentas)}</div>
+                    <div class="resumen-label">Ventas Brutas</div>
+                </div>
+                ${tieneCostos ? `
+                <div class="resumen-card">
+                    <div class="resumen-valor" style="color:#dc3545">${GOSA.formatearPrecio(resumen.totalCosto)}</div>
+                    <div class="resumen-label">(-) Costos</div>
+                </div>
+                <div class="resumen-card">
+                    <div class="resumen-valor" style="color:#ffc107">${GOSA.formatearPrecio(resumen.totalGastoOp)}</div>
+                    <div class="resumen-label">Gastos Op. (ref)</div>
+                </div>
+                <div class="resumen-card destacado" style="border-color:#28a745">
+                    <div class="resumen-valor" style="color:#28a745">${GOSA.formatearPrecio(resumen.gananciaNeta)}</div>
+                    <div class="resumen-label">Tu Ganancia</div>
+                </div>
+                ${resumen.totalSueldos !== undefined ? `
+                <div class="resumen-card" style="border-color:#ff6b35">
+                    <div class="resumen-valor" style="color:#ff6b35">${GOSA.formatearPrecio(resumen.totalSueldos)}</div>
+                    <div class="resumen-label">Sueldos del Día</div>
+                </div>
+                <div class="resumen-card destacado" style="border-color:#00d4aa">
+                    <div class="resumen-valor" style="color:#00d4aa">${GOSA.formatearPrecio((resumen.gananciaNeta || 0) - resumen.totalSueldos)}</div>
+                    <div class="resumen-label">Ganancia Real</div>
+                </div>
+                ` : ''}
+                ` : ''}
+                <div class="resumen-card">
+                    <div class="resumen-valor">${resumen.cantidadPedidos}</div>
+                    <div class="resumen-label">Pedidos</div>
+                </div>
+                <div class="resumen-card">
+                    <div class="resumen-valor">${GOSA.formatearPrecio(resumen.ticketPromedio)}</div>
+                    <div class="resumen-label">Ticket Promedio</div>
+                </div>
+            `;
+        }
+
+        // ========== RENDERIZAR PRODUCTOS ==========
+        function renderizarProductos(productos) {
+            const container = document.getElementById('tablaProductos');
+
+            if (!productos || productos.length === 0) {
+                container.innerHTML = '<p class="sin-datos">No hay productos vendidos en esta fecha</p>';
+                return;
+            }
+
+            const tieneCostos = productos.some(p => p.costo !== undefined && p.costo > 0);
+
+            container.innerHTML = `
+                <table class="productos-tabla">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Und</th>
+                            <th>Venta</th>
+                            ${tieneCostos ? '<th style="color:#dc3545">Costo</th><th style="color:#ffc107">Gasto Op. (ref)</th><th style="color:#28a745">Ganancia</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${productos.map(p => `
+                            <tr>
+                                <td>${p.nombre}</td>
+                                <td>${p.cantidad}</td>
+                                <td>${GOSA.formatearPrecio(p.ingreso)}</td>
+                                ${tieneCostos ? `
+                                    <td style="color:#dc3545">${GOSA.formatearPrecio(p.costo || 0)}</td>
+                                    <td style="color:#ffc107">${GOSA.formatearPrecio(p.gastoOperativo || 0)}</td>
+                                    <td style="color:#28a745;font-weight:600">${GOSA.formatearPrecio(p.gananciaNeta || 0)}</td>
+                                ` : ''}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // ========== FORMATEAR HORA ==========
+        function formatearHora(hora) {
+            if (!hora) return '--:--';
+            if (hora.match && hora.match(/^\d{2}:\d{2}(:\d{2})?$/)) {
+                return hora.substring(0, 5);
+            }
+            if (hora.includes && (hora.includes('GMT') || hora.includes('T'))) {
+                try {
+                    const d = new Date(hora);
+                    return d.toTimeString().substring(0, 5);
+                } catch(e) {
+                    return '--:--';
+                }
+            }
+            return String(hora).substring(0, 5);
+        }
+
+        // ========== REPORTE MENSUAL ==========
+        let _chartDias = null; // instancia de Chart.js activa
+
+        // ── Caché de reportes mensuales ──
+        const CACHE_MES_TTL_ACTUAL  = 30 * 60 * 1000; // 30 min para el mes en curso
+        const CACHE_MES_TTL_PASADO  = 7 * 24 * 60 * 60 * 1000; // 7 días para meses anteriores
+
+        function _cacheMesKey(mes) { return 'gosa_reporte_mes_' + mes; }
+
+        function _getCacheMes(mes) {
+            try {
+                const raw = localStorage.getItem(_cacheMesKey(mes));
+                if (!raw) return null;
+                const { ts, data } = JSON.parse(raw);
+                const mesActual = GOSA.fechaHoy().substring(0, 7);
+                const ttl = (mes === mesActual) ? CACHE_MES_TTL_ACTUAL : CACHE_MES_TTL_PASADO;
+                if (Date.now() - ts < ttl) return data;
+                localStorage.removeItem(_cacheMesKey(mes));
+            } catch(e) {}
+            return null;
+        }
+
+        function _setCacheMes(mes, data) {
+            try {
+                localStorage.setItem(_cacheMesKey(mes), JSON.stringify({ ts: Date.now(), data }));
+            } catch(e) {}
+        }
+
+        function _invalidarCacheMes(mes) {
+            localStorage.removeItem(_cacheMesKey(mes));
+        }
+
+        function refrescarMes() {
+            const mes = document.getElementById('mesConsulta').value;
+            if (mes) _invalidarCacheMes(mes);
+            consultarMes();
+        }
+
+        async function consultarMes() {
+            const mes = document.getElementById('mesConsulta').value;
+            if (!mes) { alert('Selecciona un mes'); return; }
+
+            const cardsEl    = document.getElementById('resumenMensualCards');
+            const estrellaEl = document.getElementById('productoEstrellaCard');
+            const graficaEl  = document.getElementById('graficaDiasMes');
+            const diasEl     = document.getElementById('tablaDiasMes');
+
+            cardsEl.style.display = 'block';
+            estrellaEl.style.display = 'none';
+            graficaEl.style.display  = 'none';
+            diasEl.style.display = 'none';
+
+            // Verificar caché
+            const cached = _getCacheMes(mes);
+            if (cached) {
+                cardsEl.innerHTML = '<div class="loading" style="color:var(--gold);font-size:0.85em">⚡ Desde caché local...</div>';
+                await new Promise(r => setTimeout(r, 80)); // micro-pausa para que se vea
+            } else {
+                cardsEl.innerHTML = '<div class="loading">Consultando...</div>';
+            }
+
+            try {
+                let res, resSueldos;
+
+                if (cached) {
+                    res        = cached.resumen;
+                    resSueldos = cached.sueldos;
+                    // Refrescar empleados del caché también
+                    if (cached.empleados) _actualizarSelectEmpleados(cached.empleados);
+                } else {
+                    // Una sola llamada al backend
+                    const completo = await GOSA.getResumenMesCompleto(mes);
+                    if (completo.error) throw new Error(completo.error);
+                    res        = completo.resumen;
+                    resSueldos = completo.sueldos;
+                    // Actualizar desplegable de empleados con los nombres del mes
+                    if (completo.empleados) _actualizarSelectEmpleados(completo.empleados);
+                    // Guardar en caché
+                    _setCacheMes(mes, completo);
+                }
+
+                if (res.error) throw new Error(res.error);
+
+                const totalSueldos  = resSueldos.total || 0;
+                const gananciaReal  = res.gananciaNeta - totalSueldos;
+
+                // Sueldos del mes agrupados por día (para la gráfica)
+                const sueldosPorDia = {};
+                (resSueldos.sueldos || []).forEach(s => {
+                    sueldosPorDia[s.fecha] = (sueldosPorDia[s.fecha] || 0) + s.valor;
+                });
+
+                // Nombre del mes legible
+                const [anio, numMes] = mes.split('-');
+                const nombreMes = new Date(anio, parseInt(numMes) - 1, 1)
+                    .toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+
+                // Cards de resumen
+                cardsEl.innerHTML = `
+                    <div class="resumen-card">
+                        <div class="resumen-valor">${GOSA.formatearPrecio(res.totalVentas)}</div>
+                        <div class="resumen-label">Ventas del Mes</div>
+                    </div>
+                    <div class="resumen-card">
+                        <div class="resumen-valor" style="color:#dc3545">${GOSA.formatearPrecio(res.totalCosto)}</div>
+                        <div class="resumen-label">(-) Costos Productos</div>
+                    </div>
+                    <div class="resumen-card">
+                        <div class="resumen-valor" style="color:#28a745">${GOSA.formatearPrecio(res.gananciaNeta)}</div>
+                        <div class="resumen-label">Ganancia luego de Costos</div>
+                    </div>
+                    <div class="resumen-card">
+                        <div class="resumen-valor" style="color:#ff6b35">${GOSA.formatearPrecio(totalSueldos)}</div>
+                        <div class="resumen-label">(-) Sueldos del Mes</div>
+                    </div>
+                    <div class="resumen-card destacado" style="border-color:#00d4aa">
+                        <div class="resumen-valor" style="color:#00d4aa">${GOSA.formatearPrecio(gananciaReal)}</div>
+                        <div class="resumen-label">Ganancia Real</div>
+                    </div>
+                    <div class="resumen-card">
+                        <div class="resumen-valor">${res.cantidadPedidos}</div>
+                        <div class="resumen-label">Pedidos del Mes</div>
+                    </div>
+                    <div class="resumen-card">
+                        <div class="resumen-valor">${GOSA.formatearPrecio(res.ticketPromedio)}</div>
+                        <div class="resumen-label">Ticket Promedio</div>
+                    </div>
+                `;
+
+                // Producto estrella
+                if (res.productos && res.productos.length > 0) {
+                    const top = res.productos[0];
+                    estrellaEl.style.display = 'block';
+                    estrellaEl.innerHTML = `
+                        <div class="producto-estrella">
+                            <div class="estrella-icono">⭐</div>
+                            <div class="estrella-info">
+                                <div class="estrella-titulo">Producto más vendido en ${nombreMes}</div>
+                                <div class="estrella-nombre">${top.nombre}</div>
+                                <div class="estrella-stats">
+                                    ${top.cantidad} unidades vendidas &nbsp;·&nbsp;
+                                    ${GOSA.formatearPrecio(top.ingreso)} en ventas &nbsp;·&nbsp;
+                                    <span style="color:#28a745">${GOSA.formatearPrecio(top.gananciaNeta)} ganancia</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Gráfica por día
+                if (res.porDia && res.porDia.length > 0) {
+                    graficaEl.style.display = 'block';
+                    if (_chartDias) { _chartDias.destroy(); _chartDias = null; }
+
+                    const labels       = res.porDia.map(d => d.fecha.split('-').slice(1).reverse().join('/'));
+                    const ventas       = res.porDia.map(d => d.totalVentas);
+                    const ganancia     = res.porDia.map(d => d.gananciaNeta);
+                    const gananciaRealDia = res.porDia.map(d =>
+                        d.gananciaNeta - (sueldosPorDia[d.fecha] || 0)
+                    );
+
+                    const ctx = document.getElementById('chartDias').getContext('2d');
+                    _chartDias = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Ventas',
+                                    data: ventas,
+                                    backgroundColor: 'rgba(255,215,0,0.65)',
+                                    borderColor: '#FFD700',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    order: 2
+                                },
+                                {
+                                    label: 'Ganancia (costos)',
+                                    data: ganancia,
+                                    backgroundColor: 'rgba(40,167,69,0.65)',
+                                    borderColor: '#28a745',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    order: 2
+                                },
+                                {
+                                    label: 'Ganancia Real',
+                                    data: gananciaRealDia,
+                                    type: 'line',
+                                    borderColor: '#00d4aa',
+                                    backgroundColor: 'rgba(0,212,170,0.15)',
+                                    borderWidth: 2.5,
+                                    pointBackgroundColor: '#00d4aa',
+                                    pointRadius: 4,
+                                    tension: 0.3,
+                                    fill: false,
+                                    order: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    labels: { color: '#E0E0E0', font: { family: 'Inter', size: 12 } }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: c => ' ' + GOSA.formatearPrecio(c.raw)
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: { color: '#E0E0E0', font: { size: 11 } },
+                                    grid:  { color: 'rgba(255,255,255,0.05)' }
+                                },
+                                y: {
+                                    ticks: {
+                                        color: '#E0E0E0',
+                                        font: { size: 11 },
+                                        callback: v => '$' + (v / 1000).toFixed(0) + 'k'
+                                    },
+                                    grid: { color: 'rgba(255,255,255,0.07)' }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Tabla por día
+                if (res.porDia && res.porDia.length > 0) {
+                    diasEl.style.display = 'block';
+                    const haySueldosDia = Object.keys(sueldosPorDia).length > 0;
+                    let filas = res.porDia.map(d => {
+                        const suelDia = sueldosPorDia[d.fecha] || 0;
+                        const gReal   = d.gananciaNeta - suelDia;
+                        return `
+                        <tr>
+                            <td>${GOSA.formatearFecha(d.fecha)}</td>
+                            <td>${d.cantidadPedidos}</td>
+                            <td>${GOSA.formatearPrecio(d.totalVentas)}</td>
+                            <td class="ganancia-positiva">${GOSA.formatearPrecio(d.gananciaNeta)}</td>
+                            ${haySueldosDia ? `<td style="color:#ff6b35">${suelDia > 0 ? GOSA.formatearPrecio(suelDia) : '—'}</td>
+                            <td style="color:#00d4aa;font-weight:600">${GOSA.formatearPrecio(gReal)}</td>` : ''}
+                        </tr>`;
+                    }).join('');
+                    document.getElementById('contenidoDiasMes').innerHTML = `
+                        <table class="dias-tabla">
+                            <thead>
+                                <tr>
+                                    <th>Día</th>
+                                    <th>Pedidos</th>
+                                    <th>Ventas</th>
+                                    <th>Gan. Costos</th>
+                                    ${haySueldosDia ? '<th style="color:#ff6b35">Sueldos</th><th style="color:#00d4aa">Gan. Real</th>' : ''}
+                                </tr>
+                            </thead>
+                            <tbody>${filas}</tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>TOTAL</td>
+                                    <td>${res.cantidadPedidos}</td>
+                                    <td>${GOSA.formatearPrecio(res.totalVentas)}</td>
+                                    <td class="ganancia-positiva">${GOSA.formatearPrecio(res.gananciaNeta)}</td>
+                                    ${haySueldosDia ? `<td style="color:#ff6b35">${GOSA.formatearPrecio(totalSueldos)}</td>
+                                    <td style="color:#00d4aa;font-weight:600">${GOSA.formatearPrecio(gananciaReal)}</td>` : ''}
+                                </tr>
+                            </tfoot>
+                        </table>
+                    `;
+                }
+
+            } catch(err) {
+                cardsEl.innerHTML = `<div class="mensaje error">Error: ${err.message}</div>`;
+            }
+        }
+
+        // ========== RENDERIZAR PEDIDOS ==========
+        function renderizarPedidos(pedidos) {
+            const container = document.getElementById('pedidosLista');
+            const lista = document.getElementById('listaPedidos');
+
+            if (!pedidos || pedidos.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+
+            // Ordenar por ID
+            pedidos.sort((a, b) => a.id - b.id);
+
+            lista.innerHTML = `
+                <div class="pedido-row header">
+                    <div>Pedido</div>
+                    <div>Hora</div>
+                    <div>Items</div>
+                    <div>Total</div>
+                    <div>Estado</div>
+                </div>
+                ${pedidos.map(p => `
+                    <div class="pedido-row">
+                        <div>#${p.id}</div>
+                        <div>${formatearHora(p.hora)}</div>
+                        <div class="pedido-items-mini">
+                            ${p.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ')}
+                        </div>
+                        <div>${GOSA.formatearPrecio(p.total)}</div>
+                        <div>
+                            <span class="estado-badge ${p.estado}">${p.estado}</span>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+    </script>
+</body>
+</html>

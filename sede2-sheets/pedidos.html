@@ -1,0 +1,619 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GOSA - Tomar Pedido</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="sistema.css">
+    <style>
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="sistema-header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="images/logo.jpeg" alt="GOSA Logo" class="logo">
+            <h1>TOMAR PEDIDO</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="pedidos.html" class="nav-btn active">Pedidos</a>
+            <a href="cocina.html" class="nav-btn">Cocina</a>
+            <a href="domicilio.html" class="nav-btn">Para Pago</a>
+            <a href="ventas.html" class="nav-btn">Ventas</a>
+            <a href="cierre.html" class="nav-btn">Cierre</a>
+            <a href="index.html" class="nav-btn">Menu</a>
+            <button class="nav-btn" id="btnActualizarPrecios" onclick="actualizarPrecios()" title="Actualizar precios desde Google Sheets">🔄</button>
+        </nav>
+    </header>
+
+    <!-- Contenido Principal -->
+    <div class="sistema-container">
+        <!-- Sección de Productos -->
+        <section class="productos-section" id="productosSection">
+            <!-- Se llena con JavaScript -->
+        </section>
+
+        <!-- Panel del Pedido -->
+        <aside class="pedido-panel" id="pedidoPanel">
+            <div class="pedido-panel-toggle" onclick="togglePanel()">
+                <div class="toggle-info">
+                    <i class="fas fa-chevron-up"></i>
+                    <span id="toggleText">Ver Pedido</span>
+                </div>
+                <span id="toggleTotal" class="toggle-total"></span>
+            </div>
+            <h2 class="pedido-titulo">
+                <i class="fas fa-receipt"></i> Pedido Actual
+            </h2>
+            <div class="pedido-items" id="pedidoItems">
+                <div class="pedido-vacio">
+                    <i class="fas fa-cart-shopping" style="font-size: 2em; margin-bottom: 10px; display: block;"></i>
+                    Agrega productos al pedido
+                </div>
+            </div>
+            <div class="pedido-total" id="pedidoTotal" style="display: none;">
+                <div class="total-linea">
+                    <span>TOTAL:</span>
+                    <span id="totalValor">$0</span>
+                </div>
+            </div>
+            <div class="pedido-notas">
+                <div class="tipo-pedido-toggle">
+                    <div class="tipo-check" id="llevarLabel" onclick="seleccionarTipo('llevar')">
+                        <i class="fas fa-bag-shopping"></i> Para llevar
+                    </div>
+                    <div class="tipo-check" id="comerLabel" onclick="seleccionarTipo('comer')">
+                        <i class="fas fa-utensils"></i> Para comer acá
+                    </div>
+                    <div class="tipo-check" id="domicilioLabel" onclick="seleccionarTipo('domicilio')">
+                        <i class="fas fa-motorcycle"></i> Domicilio
+                    </div>
+                    <div class="tipo-check tipo-check-costo" id="costoLabel" onclick="seleccionarTipo('costo')">
+                        <i class="fas fa-handshake"></i> Al Costo
+                    </div>
+                </div>
+                <div id="bannerCosto" style="display:none; background:rgba(255,107,53,0.12); border:1px solid #ff6b35; border-radius:8px; padding:8px 12px; text-align:center; color:#ff9966; font-size:0.82rem; font-weight:600; letter-spacing:1px; margin-top:6px;">
+                    🤝 MODO AL COSTO ACTIVO — precios al costo de producción
+                </div>
+
+                <!-- Selector de descuento -->
+                <div id="descuentoSection" style="margin-top:8px;">
+                    <div class="descuento-header" onclick="toggleDescuento()">
+                        <span>🏷️ % DESCUENTO</span>
+                        <i class="fas fa-chevron-down" id="descuentoChevron"></i>
+                    </div>
+                    <div id="descuentoBody">
+                        <div id="descuentoBtns" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:6px;">
+                            <button class="btn-descuento" onclick="aplicarDescuento(10)">10%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(15)">15%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(20)">20%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(25)">25%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(30)">30%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(40)">40%</button>
+                            <button class="btn-descuento" onclick="aplicarDescuento(50)">50%</button>
+                            <button class="btn-descuento btn-descuento-quitar" id="btnQuitarDescuento" onclick="aplicarDescuento(0)" style="display:none;">✕ Quitar</button>
+                        </div>
+                    </div>
+                    <div id="bannerDescuento" style="display:none; background:rgba(0,180,200,0.1); border:1px solid #00b4c8; border-radius:8px; padding:8px 12px; text-align:center; color:#00d4e8; font-size:0.82rem; font-weight:600; letter-spacing:1px; margin-top:6px;">
+                        🏷️ DESCUENTO <span id="bannerDescuentoPct"></span>% APLICADO
+                    </div>
+                </div>
+
+                <textarea id="pedidoNotas" placeholder="Notas del pedido (sin cebolla, etc.)"></textarea>
+            </div>
+            <button class="btn-enviar" id="btnEnviar" disabled onclick="enviarPedido()">
+                <i class="fas fa-paper-plane"></i> ENVIAR A COCINA
+            </button>
+            <button class="btn-limpiar" onclick="limpiarPedido()">
+                <i class="fas fa-trash"></i> Limpiar Pedido
+            </button>
+
+        </aside>
+    </div>
+
+    <!-- Modal: Armar Combo del Mes -->
+    <div id="modalCombo" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:9999; align-items:flex-end; justify-content:center;">
+        <div style="background:#1a1a1a; border-radius:16px 16px 0 0; width:100%; max-width:640px; max-height:88vh; display:flex; flex-direction:column; border-top:2px solid #FFD700;">
+            <div style="padding:16px 20px; border-bottom:1px solid #333; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+                <div>
+                    <h3 id="modalComboTitulo" style="font-family:Bebas Neue; color:#FFD700; font-size:1.5em; margin:0; letter-spacing:1px;"></h3>
+                    <p style="color:#888; font-size:0.82em; margin:4px 0 0;">Toca los productos que lleva el combo</p>
+                </div>
+                <button onclick="cerrarModalCombo()" style="background:none; border:none; color:#aaa; font-size:1.8em; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+            <div style="padding:10px 20px; background:#111; border-bottom:1px solid #333; flex-shrink:0; min-height:46px; display:flex; align-items:center;">
+                <div id="comboSeleccionados" style="font-size:0.9em; font-style:italic; color:#666;">Ningun producto seleccionado aun</div>
+            </div>
+            <div id="modalComboProductos" style="overflow-y:auto; flex:1; padding:16px 20px;"></div>
+            <div style="padding:14px 20px; border-top:1px solid #333; display:flex; gap:10px; flex-shrink:0;">
+                <button onclick="cerrarModalCombo()" style="flex:1; padding:14px; background:#2a2a2a; color:#ccc; border:1px solid #444; border-radius:8px; font-size:0.95em; cursor:pointer;">Cancelar</button>
+                <button onclick="confirmarCombo()" style="flex:2; padding:14px; background:linear-gradient(135deg,#FFD700,#FFA000); color:#000; border:none; border-radius:8px; font-size:1em; font-weight:700; cursor:pointer; font-family:Bebas Neue; letter-spacing:1px;">
+                    <i class="fas fa-check"></i> AGREGAR AL PEDIDO
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="config.js"></script>
+    <script src="menu-data.js"></script>
+    <script src="sistema.js"></script>
+    <script>
+        // ========== ESTADO DEL PEDIDO ==========
+        let pedidoActual = [];
+        let tipoPedido = null; // 'llevar' | 'comer' | 'domicilio' | 'costo' | null
+        let modoCosto = false;
+        let descuentoPct = 0; // 0 = sin descuento, 10-50 = % de descuento sobre precio venta
+        let COSTOS = {}; // { productoId: costoValue }
+
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar configuración
+            if (!GOSA.apiConfigurada()) {
+                GOSA.mostrarConfigPendiente(document.getElementById('productosSection'));
+                return;
+            }
+
+            // Cargar precios (cache local 24h o Sheets si es la primera vez del día)
+            const productos = await GOSA.cargarProductos();
+            if (productos && productos.length) {
+                productos.forEach(p => { COSTOS[p.id] = p.costo || 0; });
+            }
+
+            // Cargar productos en pantalla
+            cargarProductos();
+
+            // Sincronizar pedidos locales pendientes
+            GOSA.sincronizarPedidosLocales();
+        });
+
+        // ========== ACTUALIZAR PRECIOS (forzar desde Sheets) ==========
+        async function actualizarPrecios() {
+            const btn = document.getElementById('btnActualizarPrecios');
+            btn.textContent = '⏳';
+            btn.disabled = true;
+            const productos = await GOSA.cargarProductos(true); // forzar = true
+            if (productos && productos.length) {
+                productos.forEach(p => { COSTOS[p.id] = p.costo || 0; });
+                cargarProductos();
+                GOSA.mostrarMensaje('✅ Precios actualizados desde Sheets', 'success');
+            } else {
+                GOSA.mostrarMensaje('⚠️ No se pudo actualizar, usando precios locales', 'warning');
+            }
+            btn.textContent = '🔄';
+            btn.disabled = false;
+        }
+
+        // ========== CARGAR PRODUCTOS ==========
+        function cargarProductos() {
+            const container = document.getElementById('productosSection');
+            container.innerHTML = '';
+
+            Object.keys(GOSA.MENU).forEach(categoria => {
+                const productos = GOSA.MENU[categoria];
+                const nombreCategoria = GOSA.CATEGORIAS_NOMBRES[categoria];
+                const icono = GOSA.CATEGORIAS_ICONOS[categoria];
+
+                const categoriaHtml = `
+                    <h3 class="categoria-titulo">
+                        <i class="fas ${icono}"></i> ${nombreCategoria}
+                    </h3>
+                    <div class="productos-grid" id="grid-${categoria}">
+                        ${productos.map(producto => `
+                            <button class="producto-btn" data-id="${producto.id}" onclick="agregarProducto('${producto.id}')">
+                                <div class="producto-nombre">${producto.nombre}</div>
+                                <div class="producto-precio">${GOSA.formatearPrecio(producto.precio)}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.innerHTML += categoriaHtml;
+            });
+        }
+
+        // ========== BUSCAR PRODUCTO POR ID ==========
+        function buscarProducto(id) {
+            for (const categoria of Object.values(GOSA.MENU)) {
+                const producto = categoria.find(p => p.id === id);
+                if (producto) return producto;
+            }
+            return null;
+        }
+
+        // ========== AGREGAR PRODUCTO ==========
+        const COMBO_DEL_MES_IDS = ['cm1', 'cm2', 'cm3'];
+
+        function agregarProducto(id) {
+            const producto = buscarProducto(id);
+            if (!producto) return;
+
+            // Si es combo del mes, abrir modal para armar composicion
+            if (COMBO_DEL_MES_IDS.includes(id)) {
+                abrirModalCombo(producto);
+                return;
+            }
+
+            // Buscar si ya existe en el pedido
+            const existente = pedidoActual.find(item => item.id === id);
+
+            if (existente) {
+                existente.cantidad++;
+            } else {
+                const precioVenta = producto.precio;
+                const precioCosto = COSTOS[producto.id] || precioVenta;
+                pedidoActual.push({
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    precio: modoCosto ? precioCosto : precioVenta,
+                    precioVenta: precioVenta,
+                    precioCosto: precioCosto,
+                    esAlCosto: modoCosto,
+                    cantidad: 1
+                });
+            }
+
+            // Feedback visual
+            const btn = document.querySelector(`[data-id="${id}"]`);
+            btn.classList.add('added');
+            setTimeout(() => btn.classList.remove('added'), 300);
+
+            // Vibración
+            GOSA.vibrar();
+
+            actualizarPanelPedido();
+        }
+
+        // ========== MODIFICAR CANTIDAD ==========
+        function modificarCantidad(id, delta) {
+            const item = pedidoActual.find(i => i.id === id);
+            if (!item) return;
+
+            item.cantidad += delta;
+
+            if (item.cantidad <= 0) {
+                pedidoActual = pedidoActual.filter(i => i.id !== id);
+            }
+
+            GOSA.vibrar(30);
+            actualizarPanelPedido();
+        }
+
+        // ========== ACTUALIZAR PANEL ==========
+        function actualizarPanelPedido() {
+            const container = document.getElementById('pedidoItems');
+            const totalContainer = document.getElementById('pedidoTotal');
+            const btnEnviar = document.getElementById('btnEnviar');
+            const toggleText = document.getElementById('toggleText');
+            const toggleTotal = document.getElementById('toggleTotal');
+
+            if (pedidoActual.length === 0) {
+                container.innerHTML = `
+                    <div class="pedido-vacio">
+                        <i class="fas fa-cart-shopping" style="font-size: 2em; margin-bottom: 10px; display: block;"></i>
+                        Agrega productos al pedido
+                    </div>
+                `;
+                totalContainer.style.display = 'none';
+                btnEnviar.disabled = true;
+                toggleText.textContent = 'Ver Pedido';
+                if (toggleTotal) toggleTotal.textContent = '';
+                return;
+            }
+
+            // Generar lista de items
+            container.innerHTML = pedidoActual.map(item => `
+                <div class="pedido-item">
+                    <div class="pedido-item-info">
+                        <div class="pedido-item-nombre">${item.nombre}</div>
+                        <div class="pedido-item-precio" style="${item.esAlCosto ? 'color:#ff9966' : ''}">
+                            ${GOSA.formatearPrecio(item.precio)} c/u
+                            <button class="btn-item-costo ${item.esAlCosto ? 'activo' : ''}"
+                                onclick="toggleItemCosto('${item.id}')"
+                                title="${item.esAlCosto ? 'Volver a precio normal' : 'Aplicar precio al costo'}">💰</button>
+                        </div>
+                    </div>
+                    <div class="pedido-item-controles">
+                        <button class="cantidad-btn menos" onclick="modificarCantidad('${item.id}', -1)">-</button>
+                        <span class="cantidad-numero">${item.cantidad}</span>
+                        <button class="cantidad-btn mas" onclick="modificarCantidad('${item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Calcular total
+            const total = pedidoActual.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+            document.getElementById('totalValor').textContent = GOSA.formatearPrecio(total);
+            totalContainer.style.display = 'block';
+            btnEnviar.disabled = false;
+
+            // Actualizar toggle
+            const cantidadItems = pedidoActual.reduce((sum, item) => sum + item.cantidad, 0);
+            toggleText.textContent = `Pedido (${cantidadItems})`;
+            if (toggleTotal) toggleTotal.textContent = GOSA.formatearPrecio(total);
+        }
+
+        // ========== ENVIAR PEDIDO ==========
+        async function enviarPedido() {
+            if (pedidoActual.length === 0) return;
+
+            const btnEnviar = document.getElementById('btnEnviar');
+            const notas = document.getElementById('pedidoNotas').value.trim();
+            const marcador = tipoPedido === 'llevar' ? '[PARA LLEVAR]' : tipoPedido === 'comer' ? '[PARA COMER ACA]' : tipoPedido === 'domicilio' ? '[DOMICILIO]' : tipoPedido === 'costo' ? '[AL COSTO]' : '';
+            const marcadorDescuento = descuentoPct > 0 ? `[DESCUENTO ${descuentoPct}%]` : '';
+            const prefijos = [marcador, marcadorDescuento].filter(Boolean).join(' ');
+            const notasFinal = prefijos ? `${prefijos} ${notas}` : notas;
+
+            // Calcular total
+            const total = pedidoActual.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+
+            // Preparar items para enviar
+            const items = pedidoActual.map(item => ({
+                nombre: item.nombre,
+                cantidad: item.cantidad,
+                precio: item.precio
+            }));
+
+            // Deshabilitar botón
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVIANDO...';
+
+            try {
+                const resultado = await GOSA.crearPedido(items, total, notasFinal);
+
+                if (resultado.success) {
+                    // Éxito
+                    GOSA.vibrar(200);
+                    GOSA.reproducirSonido('success');
+
+                    btnEnviar.innerHTML = '<i class="fas fa-check"></i> PEDIDO ENVIADO!';
+                    btnEnviar.style.background = '#28a745';
+
+                    // Mostrar número de pedido
+                    alert(`Pedido #${resultado.id} enviado a cocina!`);
+
+                    // Limpiar después de 2 segundos
+                    setTimeout(() => {
+                        limpiarPedido();
+                        btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR A COCINA';
+                        btnEnviar.style.background = '';
+                    }, 2000);
+                } else {
+                    throw new Error(resultado.error || 'Error desconocido');
+                }
+            } catch (error) {
+                console.error('Error enviando pedido:', error);
+
+                // Guardar localmente como backup
+                GOSA.guardarPedidoLocal({ items, total, notas: notasFinal });
+
+                btnEnviar.innerHTML = '<i class="fas fa-exclamation-triangle"></i> GUARDADO LOCAL';
+                btnEnviar.style.background = '#ffc107';
+                btnEnviar.style.color = '#000';
+
+                alert('Error de conexión. El pedido se guardó localmente y se sincronizará cuando haya conexión.');
+
+                setTimeout(() => {
+                    limpiarPedido();
+                    btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR A COCINA';
+                    btnEnviar.style.background = '';
+                    btnEnviar.style.color = '';
+                }, 3000);
+            }
+        }
+
+        // ========== LIMPIAR PEDIDO ==========
+        function limpiarPedido() {
+            pedidoActual = [];
+            tipoPedido = null;
+            modoCosto = false;
+            document.getElementById('pedidoNotas').value = '';
+            ['llevarLabel','comerLabel','domicilioLabel','costoLabel'].forEach(id =>
+                document.getElementById(id).classList.remove('activo'));
+            document.getElementById('bannerCosto').style.display = 'none';
+            aplicarDescuento(0);
+            actualizarPanelPedido();
+            document.getElementById('pedidoPanel').classList.remove('expandido');
+        }
+
+        // ========== DESCUENTO % ==========
+        function toggleDescuento() {
+            const body = document.getElementById('descuentoBody');
+            const header = document.querySelector('.descuento-header');
+            const open = body.classList.toggle('visible');
+            header.classList.toggle('abierto', open);
+        }
+
+        function aplicarDescuento(pct) {
+            descuentoPct = pct;
+
+            // Actualizar botones
+            document.querySelectorAll('.btn-descuento').forEach(btn => btn.classList.remove('activo'));
+            if (pct > 0) {
+                const btnActivo = Array.from(document.querySelectorAll('.btn-descuento'))
+                    .find(b => b.textContent === pct + '%');
+                if (btnActivo) btnActivo.classList.add('activo');
+            }
+            document.getElementById('btnQuitarDescuento').style.display = pct > 0 ? 'inline-flex' : 'none';
+
+            // Banner
+            const banner = document.getElementById('bannerDescuento');
+            if (pct > 0) {
+                document.getElementById('bannerDescuentoPct').textContent = pct;
+                banner.style.display = 'block';
+            } else {
+                banner.style.display = 'none';
+            }
+
+            // Recalcular precios del carrito
+            pedidoActual.forEach(item => {
+                if (!item.esAlCosto) {
+                    item.precio = Math.round(item.precioVenta * (1 - pct / 100));
+                }
+            });
+
+            GOSA.vibrar(30);
+            actualizarPanelPedido();
+        }
+
+        // ========== AL COSTO POR ÍTEM ==========
+        function toggleItemCosto(id) {
+            const item = pedidoActual.find(i => i.id === id);
+            if (!item) return;
+            item.esAlCosto = !item.esAlCosto;
+            item.precio = item.esAlCosto ? item.precioCosto : item.precioVenta;
+            GOSA.vibrar(30);
+            actualizarPanelPedido();
+        }
+
+        // ========== SELECCIONAR TIPO DE PEDIDO ==========
+        function seleccionarTipo(tipo) {
+            const eraModoCosto = modoCosto;
+
+            // Toggle off si ya estaba activo
+            if (tipoPedido === tipo) {
+                tipoPedido = null;
+                modoCosto = false;
+                ['llevarLabel','comerLabel','domicilioLabel','costoLabel'].forEach(id =>
+                    document.getElementById(id).classList.remove('activo'));
+                document.getElementById('bannerCosto').style.display = 'none';
+                if (eraModoCosto) {
+                    pedidoActual.forEach(item => { item.precio = item.precioVenta; });
+                    actualizarPanelPedido();
+                }
+                return;
+            }
+
+            tipoPedido = tipo;
+            modoCosto = tipo === 'costo';
+            document.getElementById('llevarLabel').classList.toggle('activo', tipo === 'llevar');
+            document.getElementById('comerLabel').classList.toggle('activo', tipo === 'comer');
+            document.getElementById('domicilioLabel').classList.toggle('activo', tipo === 'domicilio');
+            document.getElementById('costoLabel').classList.toggle('activo', tipo === 'costo');
+            document.getElementById('bannerCosto').style.display = tipo === 'costo' ? 'block' : 'none';
+
+            // Actualizar precios del carrito si cambió el modo costo global
+            if (eraModoCosto !== modoCosto) {
+                pedidoActual.forEach(item => {
+                    item.esAlCosto = modoCosto;
+                    item.precio = modoCosto ? item.precioCosto : item.precioVenta;
+                });
+                actualizarPanelPedido();
+            }
+        }
+
+        // ========== TOGGLE PANEL (MÓVIL) ==========
+        function togglePanel() {
+            document.getElementById('pedidoPanel').classList.toggle('expandido');
+        }
+
+        // ========== MODAL ARMAR COMBO DEL MES ==========
+        let comboEnModal = null;
+        let composicionCombo = [];
+
+        function abrirModalCombo(producto) {
+            comboEnModal = producto;
+            composicionCombo = [];
+            document.getElementById("modalComboTitulo").textContent =
+                producto.nombre.toUpperCase() + "  —  " + GOSA.formatearPrecio(producto.precio);
+            const container = document.getElementById("modalComboProductos");
+            container.innerHTML = "";
+            Object.keys(GOSA.MENU).forEach(function(cat) {
+                if (cat === "comboDelMes") return;
+                const prods = GOSA.MENU[cat];
+                const nombreCat = GOSA.CATEGORIAS_NOMBRES[cat];
+                const icono = GOSA.CATEGORIAS_ICONOS[cat];
+                const seccion = document.createElement("div");
+                seccion.style.marginBottom = "18px";
+                const btns = prods.map(function(p) {
+                    return "<button id=\"combobtn-" + p.id + "\" "
+                        + "data-pid=\"" + p.id + "\" "
+                        + "data-pnombre=\"" + p.nombre.replace(/"/g, "&quot;") + "\" "
+                        + "data-pprecio=\"" + p.precio + "\" "
+                        + "onclick=\"toggleProductoCombo(this)\" "
+                        + "style=\"padding:9px 14px; background:#2a2a2a; color:#ccc; border:1px solid #444; border-radius:8px; font-size:0.85em; cursor:pointer; transition:all 0.15s;\">"
+                        + p.nombre + "<br><span style='font-size:0.78em;opacity:0.6'>" + GOSA.formatearPrecio(p.precio) + "</span></button>";
+                }).join("");
+                seccion.innerHTML =
+                    "<div style=\"font-family:Bebas Neue,sans-serif; color:#aaa; font-size:0.95em; letter-spacing:1px; margin-bottom:8px;\">"
+                    + "<i class=\"fas " + icono + "\" style=\"margin-right:6px;\"></i>" + nombreCat + "</div>"
+                    + "<div style=\"display:flex; flex-wrap:wrap; gap:8px;\">" + btns + "</div>";
+                container.appendChild(seccion);
+            });
+            actualizarSeleccionadosCombo();
+            document.getElementById("modalCombo").style.display = "flex";
+        }
+
+        function toggleProductoCombo(btn) {
+            const id     = btn.dataset.pid;
+            const nombre = btn.dataset.pnombre;
+            const precio = parseInt(btn.dataset.pprecio) || 0;
+            const idx = composicionCombo.findIndex(function(p) { return p.id === id; });
+            if (idx >= 0) {
+                composicionCombo.splice(idx, 1);
+                btn.style.background = "#2a2a2a";
+                btn.style.borderColor = "#444";
+                btn.style.color = "#ccc";
+                btn.style.fontWeight = "normal";
+            } else {
+                composicionCombo.push({ id: id, nombre: nombre, precio: precio });
+                btn.style.background = "#FFD700";
+                btn.style.borderColor = "#FFD700";
+                btn.style.color = "#000";
+                btn.style.fontWeight = "700";
+            }
+            actualizarSeleccionadosCombo();
+        }
+
+        function actualizarSeleccionadosCombo() {
+            const el = document.getElementById("comboSeleccionados");
+            if (composicionCombo.length === 0) {
+                el.textContent = "Ningun producto seleccionado aun";
+                el.style.color = "#666";
+                el.style.fontStyle = "italic";
+            } else {
+                const totalSuma = composicionCombo.reduce(function(s, p) { return s + p.precio; }, 0);
+                el.innerHTML = composicionCombo.map(function(p) { return p.nombre; }).join(" + ")
+                    + " <span style='color:#aaa;font-size:0.88em'>= " + GOSA.formatearPrecio(totalSuma) + "</span>";
+                el.style.color = "#FFD700";
+                el.style.fontStyle = "normal";
+            }
+        }
+
+        function confirmarCombo() {
+            if (!comboEnModal) return;
+            const ts = Date.now();
+            if (composicionCombo.length > 0) {
+                // Agregar cada producto seleccionado como ítem individual con su precio real
+                composicionCombo.forEach(function(p, i) {
+                    const existente = pedidoActual.find(function(it) { return it.id === p.id; });
+                    if (existente) {
+                        existente.cantidad++;
+                    } else {
+                        pedidoActual.push({ id: p.id, nombre: p.nombre, precio: p.precio, cantidad: 1 });
+                    }
+                });
+            } else {
+                // Sin selección: agregar el combo con su precio fijo (caso raro)
+                pedidoActual.push({ id: comboEnModal.id + "_" + ts, nombre: comboEnModal.nombre, precio: comboEnModal.precio, cantidad: 1 });
+            }
+            const btn = document.querySelector("[data-id=\"" + comboEnModal.id + "\"]");
+            if (btn) {
+                btn.classList.add("added");
+                setTimeout(function() { btn.classList.remove("added"); }, 300);
+            }
+            cerrarModalCombo();
+            GOSA.vibrar();
+            actualizarPanelPedido();
+        }
+
+        function cerrarModalCombo() {
+            document.getElementById("modalCombo").style.display = "none";
+            comboEnModal = null;
+            composicionCombo = [];
+        }
+    </script>
+</body>
+</html>

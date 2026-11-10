@@ -1,0 +1,1228 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ========== Variables y Reset ========== */
+:root {
+    --gold: #FFD700;
+    --gold-dark: #FFC107;
+    --black: #000000;
+    --white: #FFFFFF;
+    --gray-light: #E0E0E0;
+    --gray-dark: #4B4B4B;
+    --bg-overlay: rgba(0, 0, 0, 0.85);
+    --card-bg: rgba(20, 20, 20, 0.9);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Fondo con marca de agua */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/logo.jpeg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50%;
+    opacity: 0.05;
+    z-index: -1;
+}
+
+/* ========== Header Mejorado ========== */
+header {
+    text-align: center;
+    padding: 30px 20px 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
+    position: relative;
+}
+
+header img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid var(--gold);
+    object-fit: cover;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+    transition: var(--transition);
+}
+
+header img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 48px rgba(255, 215, 0, 0.5);
+}
+
+.main-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5em;
+    color: var(--gold);
+    letter-spacing: 6px;
+    margin: 10px 0;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.subtitle {
+    font-size: 1.1em;
+    color: var(--gray-light);
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-top: -5px;
+}
+
+/* ========== Carousel Optimizado ========== */
+.swiper-container {
+    width: 100%;
+    height: 180px;
+    margin: 30px auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.swiper-wrapper {
+    display: flex;
+    width: calc((180px * 8) + (20px * 8));
+    animation: scroll 12s linear infinite;
+    gap: 20px;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-180px * 4 - 20px * 4));
+    }
+}
+
+.swiper-slide {
+    width: 180px;
+    height: 180px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid var(--gold-dark);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.swiper-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ========== Banner Promocional ========== */
+.promotion {
+    text-align: center;
+    margin: 30px auto;
+    padding: 0 20px;
+    max-width: 800px;
+}
+
+.promotion-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--black);
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5em;
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.promotion-badge i {
+    margin: 0 10px;
+    animation: rotate-star 3s linear infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 12px 32px rgba(255, 215, 0, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes rotate-star {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.promotion-img {
+    max-width: 450px;
+    width: 85%;
+    height: auto;
+    border-radius: 16px;
+    border: 3px solid var(--gold-dark);
+    box-shadow: 0 8px 32px rgba(255, 215, 0, 0.25);
+    transition: var(--transition);
+    display: block;
+    margin: 0 auto;
+}
+
+.promotion-img:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 48px rgba(255, 215, 0, 0.35);
+}
+
+.promotion-text {
+    color: var(--gray-light);
+    font-size: 1.05em;
+    margin-top: 15px;
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* ========== Slider Promocional ========== */
+.promo-slide {
+    display: none;
+}
+
+.promo-slide.active {
+    display: block;
+    animation: promo-fade 0.4s ease;
+}
+
+@keyframes promo-fade {
+    from { opacity: 0; transform: translateX(15px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.promo-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.promo-arrow {
+    background: rgba(255, 215, 0, 0.12);
+    border: 2px solid var(--gold-dark);
+    color: var(--gold);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.6em;
+    line-height: 1;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promo-arrow:hover {
+    background: var(--gold);
+    color: var(--black);
+}
+
+.promo-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.promo-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 215, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.promo-dot.active {
+    background: var(--gold);
+    transform: scale(1.4);
+}
+
+/* ========== Main Content ========== */
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+}
+
+.menu-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3em;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* ========== Acordeón Sistema ========== */
+.accordion-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.accordion-item {
+    background: var(--card-bg);
+    border: 2px solid var(--gray-dark);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.accordion-item:hover {
+    border-color: var(--gold-dark);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
+}
+
+.accordion-header {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), transparent);
+    border: none;
+    color: var(--white);
+    padding: 18px 24px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3em;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: var(--transition);
+    width: 100%;
+    text-align: left;
+}
+
+.accordion-header:hover {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.02));
+    color: var(--gold);
+}
+
+.accordion-header i:first-child {
+    font-size: 1.4em;
+    color: var(--gold);
+    min-width: 30px;
+}
+
+.accordion-header span {
+    flex: 1;
+}
+
+.accordion-icon {
+    font-size: 1.2em;
+    color: var(--gold);
+    transition: transform 0.3s ease;
+}
+
+.accordion-item.active .accordion-icon {
+    transform: rotate(-180deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+
+.accordion-item.active .accordion-content {
+    max-height: 5000px;
+    padding: 20px;
+}
+
+.accordion-barril-emoji {
+    font-size: 1.4em;
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* ========== Fondos Especiales de Categorías ========== */
+.accordion-item[data-category="hamburguesas"] {
+    position: relative;
+    background-color: var(--black);
+}
+
+.accordion-background-hamburguesas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('images/fondo hamburguesas.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: local;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.accordion-item[data-category="hamburguesas"] .accordion-header,
+.accordion-item[data-category="hamburguesas"] .accordion-content {
+    position: relative;
+    z-index: 2;
+}
+
+    position: relative;
+    z-index: 2;
+}
+
+/* ========== Menu Grid ========== */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    padding: 10px;
+}
+
+.menu-card {
+    background: var(--card-bg);
+    border: 2px solid var(--gray-dark);
+    border-radius: 16px;
+    padding: 25px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+}
+
+.menu-card:hover::before {
+    transform: translateX(100%);
+}
+
+.menu-card:hover {
+    border-color: var(--gold-dark);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.2);
+}
+
+.menu-card.featured {
+    border-color: var(--gold-dark);
+    background: var(--card-bg);
+}
+
+.featured-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--black);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85em;
+    letter-spacing: 1px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    z-index: 10;
+    transform: rotate(-2deg);
+}
+
+.featured-badge::before {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 10%;
+    width: 80%;
+    height: 5px;
+    background: rgba(0, 0, 0, 0.3);
+    filter: blur(4px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+
+.menu-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8em;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1.2;
+}
+
+.menu-card .price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5em;
+    color: var(--white);
+    background: var(--gray-dark);
+    padding: 8px 16px;
+    border-radius: 10px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.menu-card .description {
+    color: var(--gray-light);
+    font-size: 0.95em;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* ========== Opción Doble en Menú ========== */
+.double-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--gray-dark);
+}
+
+.double-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8em;
+    color: var(--gold);
+    letter-spacing: 2px;
+    line-height: 1.2;
+}
+
+.double-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4em;
+    color: var(--white);
+    background: var(--gray-dark);
+    padding: 6px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== Extras Grid ========== */
+.extras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.extra-item {
+    background: var(--card-bg);
+    border: 2px solid var(--gray-dark);
+    border-radius: 12px;
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+}
+
+.extra-item:hover {
+    border-color: var(--gold-dark);
+    transform: translateX(5px);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.15);
+}
+
+.extra-name {
+    font-size: 1.05em;
+    color: var(--white);
+    font-weight: 500;
+}
+
+.extra-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3em;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ========== Combos Grid ========== */
+.combos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    padding: 10px;
+}
+
+.combo-card {
+    background: var(--card-bg);
+    border: 2px solid var(--gray-dark);
+    border-radius: 16px;
+    padding: 35px 25px;
+    text-align: center;
+    transition: var(--transition);
+    position: relative;
+}
+
+.combo-card:hover {
+    border-color: var(--gold-dark);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.2);
+}
+
+.combo-card.featured {
+    border-color: var(--gold-dark);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(20, 20, 20, 0.9));
+}
+
+.combo-icon {
+    font-size: 3em;
+    color: var(--gold);
+    margin-bottom: 15px;
+    display: block;
+}
+
+.combo-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8em;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.combo-description {
+    color: var(--gray-light);
+    font-size: 0.95em;
+    margin-bottom: 10px;
+}
+
+.combo-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2em;
+    color: var(--white);
+    margin-top: 10px;
+}
+
+/* ========== Footer ========== */
+footer {
+    text-align: center;
+    padding: 50px 20px 30px;
+    margin-top: 60px;
+    background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+    border-top: 2px solid var(--gold-dark);
+}
+
+.footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2em;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 20px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.social-icons a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background: var(--card-bg);
+    color: var(--gold);
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 26px;
+    transition: var(--transition);
+    border: 2px solid var(--gold-dark);
+}
+
+.social-icons a:hover {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--black);
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
+}
+
+.footer-text {
+    color: var(--gray-light);
+    font-size: 0.9em;
+    margin-top: 20px;
+    font-weight: 300;
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2.5em;
+        letter-spacing: 4px;
+    }
+
+    .subtitle {
+        font-size: 0.95em;
+    }
+
+    .menu-title {
+        font-size: 2.2em;
+    }
+
+    .accordion-header {
+        padding: 14px 16px;
+        font-size: 1.1em;
+        letter-spacing: 1px;
+    }
+
+    .accordion-header i:first-child {
+        font-size: 1.2em;
+    }
+
+    .accordion-header .accordion-icon {
+        font-size: 1em;
+    }
+
+    .menu-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .extras-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .combos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .swiper-container {
+        height: 150px;
+    }
+
+    .swiper-slide {
+        width: 150px;
+        height: 150px;
+    }
+
+    .swiper-wrapper {
+        width: calc((150px * 8) + (15px * 8));
+        gap: 15px;
+    }
+
+    @keyframes scroll {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-150px * 4 - 15px * 4));
+        }
+    }
+
+    header img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .promotion-badge {
+        font-size: 1.2em;
+        padding: 10px 20px;
+        letter-spacing: 2px;
+    }
+
+    .promotion-img {
+        max-width: 100%;
+    }
+
+    .promotion-text {
+        font-size: 0.95em;
+        padding: 0 10px;
+    }
+
+    .footer-title {
+        font-size: 1.5em;
+    }
+
+    .social-icons a {
+        width: 55px;
+        height: 55px;
+        font-size: 24px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .accordion-header {
+        padding: 16px 20px;
+        font-size: 1.2em;
+    }
+}
+
+/* ========== Animaciones Adicionales ========== */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.menu-card.featured:hover {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gold-dark);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* ========== Botón Flotante WhatsApp ========== */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: var(--white);
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 35px;
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+    z-index: 1000;
+    transition: var(--transition);
+    text-decoration: none;
+    cursor: pointer;
+    animation: float-bounce 3s ease-in-out infinite;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.15);
+    box-shadow: 0 12px 32px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-float:hover .whatsapp-text {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+}
+
+.whatsapp-text {
+    position: absolute;
+    right: 75px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95em;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+    opacity: 0;
+    transform: translateX(10px);
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-text::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid #128C7E;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+}
+
+@keyframes float-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Responsive WhatsApp button */
+@media (max-width: 768px) {
+    .whatsapp-float {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .whatsapp-text {
+        font-size: 0.85em;
+        padding: 10px 16px;
+        right: 70px;
+    }
+}
+
+/* ========== Ahumados Gosa ========== */
+
+/* Tab button especial */
+.tab-btn.tab-ahumados {
+    border-color: #8b4513;
+    color: #d4824a;
+    background: rgba(139, 69, 19, 0.08);
+    margin-left: 6px;
+    position: relative;
+}
+
+.tab-btn.tab-ahumados::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 20%;
+    height: 60%;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, #8b4513, transparent);
+}
+
+.tab-btn.tab-ahumados:hover {
+    border-color: #e85d04;
+    color: #ff8c42;
+    box-shadow: 0 4px 16px rgba(232, 93, 4, 0.3);
+    transform: translateY(-2px);
+}
+
+.tab-btn.tab-ahumados.active {
+    background: linear-gradient(135deg, #8b4513, #e85d04);
+    border-color: #e85d04;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(232, 93, 4, 0.5);
+}
+
+.tab-barril-emoji {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+/* Logo dentro del panel */
+.ahumados-logo {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #e85d04;
+    box-shadow: 0 0 40px rgba(232, 93, 4, 0.6), 0 0 80px rgba(232, 93, 4, 0.2);
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: rgba(139, 69, 19, 0.1);
+}
+
+/* Header de la sección */
+.ahumados-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.ahumados-prox-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #8b4513, #e85d04);
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4em;
+    letter-spacing: 3px;
+    padding: 10px 28px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(232, 93, 4, 0.4);
+    animation: ahumados-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes ahumados-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(232, 93, 4, 0.4); }
+    50%       { box-shadow: 0 4px 32px rgba(232, 93, 4, 0.75); }
+}
+
+.ahumados-desc {
+    color: #d4824a;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95em;
+    margin-top: 12px;
+    opacity: 0.85;
+}
+
+/* Cards de platos ahumados */
+.menu-card.ahumados-card {
+    border-color: #5a2d0c;
+    background: linear-gradient(145deg, #1a0f08, #120b05);
+}
+
+.menu-card.ahumados-card:hover {
+    border-color: #e85d04;
+    box-shadow: 0 8px 30px rgba(232, 93, 4, 0.25);
+    transform: translateY(-4px);
+}
+
+.menu-card.ahumados-card h3 {
+    color: #ff8c42;
+}
+
+/* Precio próximamente */
+.precio-prox {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1em;
+    color: #8b4513;
+    letter-spacing: 2px;
+    opacity: 0.7;
+}
+
+.precio-prox-sm {
+    color: #8b4513 !important;
+    opacity: 0.7;
+    letter-spacing: 2px;
+}
+
+/* Adicionales dentro de Ahumados */
+.ahumados-adicionales {
+    margin-top: 40px;
+    padding: 24px;
+    border: 1px solid #5a2d0c;
+    border-radius: 16px;
+    background: rgba(139, 69, 19, 0.06);
+}
+
+.ahumados-adicionales-titulo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6em;
+    color: #d4824a;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.extra-item.ahumados-extra {
+    border-color: #5a2d0c;
+    background: rgba(139, 69, 19, 0.08);
+}
+
+.extra-item.ahumados-extra:hover {
+    border-color: #e85d04;
+    background: rgba(232, 93, 4, 0.12);
+}
+
+.extra-item.ahumados-extra .extra-name {
+    color: #d4824a;
+}
+
+/* ========== Headers con Fondos de Imagen Personalizados ========== */
+.accordion-header-entradas {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/entradas fondo.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.accordion-header-perros {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/fondo perro.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+
+/* ========== Headers Personalizados - 90px ========== */
+.accordion-header-entradas,
+.accordion-header-perros,
+.accordion-header-salchipapas,
+.accordion-header-hamburguesas,
+.accordion-header-ahumados {
+    height: 90px !important;
+    padding: 8px 24px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.accordion-header-entradas {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/entradas fondo.jpeg') !important;
+}
+
+.accordion-header-perros {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/fondo perro.jpeg') !important;
+}
+
+.accordion-header-salchipapas {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/salchipapa fondo.jpeg') !important;
+}
+
+.accordion-header-hamburguesas {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/fondo hamburguesas.jpeg') !important;
+}
+
+.accordion-header-ahumados {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/asados fondo.jpeg') !important;
+}
+
+.accordion-header-adicionales {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/fondo-adicionales.jpeg') !important;
+}
+
+.accordion-header-adicionales {
+    height: 90px !important;
+    padding: 8px 24px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+.accordion-header-bebidas {
+    height: 90px !important;
+    padding: 8px 24px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/bebidas.jpeg') !important;
+}
+
+.bebidas-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: var(--black);
+}
+
+.bebidas-imagen {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+}
+
+/* Burbuja informativa (ej. perros con salchicha americana) */
+.info-bubble {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 520px;
+    margin: 10px auto 20px;
+    padding: 10px 20px 10px 10px;
+    background: rgba(255, 215, 0, 0.08);
+    border: 2px solid var(--gold);
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.info-bubble-img {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    object-fit: cover;
+}
+
+.info-bubble p {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.95em;
+    line-height: 1.3;
+}
+
+.info-bubble strong {
+    color: var(--gold);
+}
+
+.info-bubble {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(255, 193, 7, 0.06));
+    animation: bubble-glow 2.5s ease-in-out infinite;
+}
+
+.info-bubble-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.info-bubble-tag {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1em;
+    letter-spacing: 1.5px;
+    padding: 1px 10px;
+    border-radius: 12px;
+    transform: rotate(-2deg);
+}
+
+.info-bubble .info-bubble-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5em;
+    letter-spacing: 1px;
+    line-height: 1;
+}
+
+@keyframes bubble-glow {
+    0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2); }
+    50%      { box-shadow: 0 4px 24px rgba(255, 215, 0, 0.55); }
+}
+
+/* Sede 2: categoría Platos a la carta (foto de parrilla) */
+.accordion-header-platos {
+    height: 90px !important;
+    padding: 8px 24px !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('images/asados fondo.jpeg') !important;
+}

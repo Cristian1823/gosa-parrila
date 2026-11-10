@@ -276,6 +276,7 @@ h1, h2, h3, p { margin: 0; }
 .header-perros { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-perros.jpeg'); }
 .header-hamburguesas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-hamburguesas.jpeg'); }
 .header-salchipapas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-salchipapas.jpeg'); }
+.header-platos-a-la-carta { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-platos.jpeg'); }
 .header-adicionales { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-adicionales.jpeg'); }
 .header-bebidas { background-image: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)), url('/images/fondo-bebidas.jpeg'); }
 .accordion-header[class*='header-']:not(.header-plain):hover { color: var(--gold); }
