@@ -14,6 +14,7 @@ backend/*.db-shm
 
 # Sede 2 (Sheets): config con URL del backend y PIN
 sede2-sheets/config.js
+sede2-sheets/dist/
 
 # Sede 1: solo referencia local (videos pesados y CLAUDE.md con PINs)
 gosa food truck/

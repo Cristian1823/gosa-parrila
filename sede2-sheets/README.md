@@ -32,7 +32,58 @@ Quedan fuera de esta versión: inventario con recetas y tarjeta de sellos de cli
    - `API_URL`: la URL del paso 4.
    - `PIN_CIERRE` y `PIN_ELIMINAR`: PIN de 4 dígitos nuevos, definidos por el cliente. Vacío = esa función queda bloqueada.
 6. **Probar.** Abre `index.html` con Live Server (o `python -m http.server` dentro de esta carpeta) y recorre: crear un pedido en `pedidos.html`, verlo en `cocina.html`, cobrarlo en `domicilio.html` y revisar `ventas.html`.
-7. **Publicar el sitio.** Sube esta carpeta a Cloudflare Pages (carga directa). No hace falta subir `hoja-google/`. El QR del menú apunta a la dirección de `index.html`.
+7. **Publicar el sitio** en Cloudflare Pages: ver la sección siguiente. No se sube `config.js` a mano: se genera en cada despliegue.
+
+## Despliegue en Cloudflare Pages
+
+Se crean **dos proyectos de Pages desde el mismo repositorio de GitHub**: uno para el menú público (el del QR) y otro para el sistema interno. Así el sistema, la URL del backend y los PIN no quedan en la dirección pública del menú. `build.js` prepara cada sitio y genera su `config.js` con variables de Cloudflare, de modo que **nada se edita a mano** y cada `git push` a `main` publica solo.
+
+En Cloudflare: *Workers & Pages → Create → Pages → Connect to Git* y elige el repositorio.
+
+**Proyecto 1: menú público** (nombre sugerido `gosa-menu`)
+
+| Campo | Valor |
+|---|---|
+| Production branch | `main` |
+| Framework preset | None |
+| Root directory | `sede2-sheets` |
+| Build command | `node build.js menu` |
+| Build output directory | `dist/menu` |
+
+Sin variables obligatorias. Opcional: `MENU_API_URL` (la URL del Apps Script) para que el menú tome los precios de la hoja de Google; esa URL quedaría visible en el sitio público, por eso viene apagada y el menú usa los precios del HTML.
+
+**Proyecto 2: sistema interno** (nombre sugerido `gosa-pos`)
+
+| Campo | Valor |
+|---|---|
+| Production branch | `main` |
+| Framework preset | None |
+| Root directory | `sede2-sheets` |
+| Build command | `node build.js pos` |
+| Build output directory | `dist/pos` |
+
+Variables (*Settings → Variables and Secrets*, tipo Texto o Secreto, en *Production*):
+
+| Variable | Valor |
+|---|---|
+| `API_URL` | **Obligatoria.** La URL del Apps Script (termina en `/exec`). Sin ella el despliegue falla a propósito |
+| `PIN_CIERRE` | 4 dígitos. Vacía = el cierre queda bloqueado |
+| `PIN_ELIMINAR` | 4 dígitos. Vacía = no se pueden eliminar pedidos |
+| `MENU_URL` | Opcional. La dirección del proyecto 1 (por ejemplo `https://gosa-menu.pages.dev`) para el botón "Menu" |
+
+Al cambiar una variable hay que **volver a desplegar** (*Deployments → Retry deployment*), porque `config.js` se genera durante la construcción.
+
+**Proteger el sistema interno (muy recomendable).** El sitio `gosa-pos` no pide usuario: cualquiera con la dirección puede abrirlo, y `config.js` incluye la URL del backend y los PIN. Se le puede poner una puerta gratuita: *Zero Trust → Access → Applications → Add an application → Self-hosted*, con el dominio de `gosa-pos` y una política *Allow* con los correos autorizados (el equipo del local). Mientras tanto, no compartas esa dirección. El sitio ya sale con `noindex` y sin caché, y su raíz abre Pedidos.
+
+**Probar la construcción en el computador** (opcional):
+
+```powershell
+cd sede2-sheets
+$env:API_URL = "https://script.google.com/macros/s/XXXX/exec"; $env:PIN_CIERRE = "1234"; $env:PIN_ELIMINAR = "5678"
+node build.js          # genera dist/menu y dist/pos (dist/ no se sube a git)
+```
+
+Para trabajar en local sigue sirviendo Live Server sobre esta carpeta con su propio `config.js`.
 
 ## Costos y ganancias (para el cierre de caja)
 
