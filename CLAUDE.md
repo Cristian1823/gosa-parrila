@@ -39,7 +39,7 @@ backend/
 frontend/
   public/logo.jpg  logo horizontal "GOSA PARRILLA" (recortado); favicon.png = la "G"
 assets/            logo-gosa-parrilla-original.jpeg: el archivo original que entregó el cliente (1536x1024)
-  public/images/   fondos de categoría y bebidas.jpeg
+  public/images/   fondos de categoría, bebidas.jpeg y promocion.jpeg (banner del mes)
   src/main.jsx     rutas
   src/lib.js       api, money, usePolling, slug, groupMenu
   src/styles.css   tokens de marca + POS + menú digital
@@ -135,7 +135,7 @@ Tokens en `:root` de `src/styles.css`, idénticos a la sede 1:
 4. **Publicar menú** estático en Cloudflare Pages (`menu.json` + botón/comando "Publicar menú"); cuenta de Cloudflare pendiente.
 5. **Login/PIN** para `/pos/*` y endpoints de cocina/pago (hoy abiertos; la red del POS debe ser interna).
 6. Sin impuestos (impoconsumo 8 %) ni facturación electrónica por ahora.
-7. Banner de promoción y carrusel de videos del menú de la sede 1: **no traídos** (la promo de noviembre es del truck). Ahumados excluidos.
+7. **Banner de promoción:** cargado el de la sede 1 (nov 2026, a pedido del cliente): `frontend/public/images/promocion.jpeg` y `sede2-sheets/images/promocion.jpeg`, con la insignia "PROMOCIÓN DEL MES" y el texto "¡Oferta válida todo el mes!" entre el encabezado y el menú (`Menu.jsx` y el generador `tools/generar_sede2.py`; estilos `.promotion*`). **Ojo:** esa imagen es la promo de noviembre de la sede 1 y su arte dice "GOSA Food Truck"; cambia cada mes. Para actualizarla, reemplazar esos dos archivos (mismo nombre) y hacer push. No está en la carta imprimible. El carrusel de videos y Ahumados siguen **sin traer**.
 8. Marcadores sin completar: `[HORARIO]` y `[DIRECCIÓN DEL LOCAL]` (pie de `Menu.jsx`), `[CAJERO]` (`Bits.jsx`); `INFO` en `Carta.jsx` (horario/dirección vacíos; redes copiadas de la sede 1: @gosa_ft, @gosa.food.truck — confirmar si el local tiene cuentas propias). Nombre del local: **GOSA Parrilla** (según el logo nuevo; el título del menú usa solo el logo y el pie dice "GOSA Parrilla ©").
 9. **Confirmar con el cliente** (valores del PDF dudosos, ya aplicados con una suposición): Queso cheddar adicional `300` → se puso 3.000; Chicharrón adicional `400` → 4.000; nombres `Bucaro` (entrada) vs `Salchi Bucara`; `Gosa Gacuho` (¿Gaucho?); alcance de la nota del combo (se aplicó solo a Perros: el PDF dice "los dos cris"); precios de Bebidas (el PDF no las trae); si Totopos, Tender y 360 Hamburguer salen definitivamente.
 10. **Logo — aplicado (nov 2026):** el cliente entregó el logo nuevo "GOSA PARRILLA" (horizontal). El original está en `assets/logo-gosa-parrilla-original.jpeg`; se recortaron sus márgenes negros con Pillow y se guardó como `frontend/public/logo.jpg` y `sede2-sheets/images/logo.jpeg` (mismos nombres que antes, para no tocar referencias). Los estilos del logo ya no lo recortan en círculo ni le ponen borde (`.logo` en `styles.css`, `.c-logo` en `carta.css`, `header img` en `sede2-sheets/style.css`, `.sistema-header .logo` en `sistema.css`, `.logo-pin` en `cierre.html`); el título "GOSA" en texto se quitó del encabezado porque el logo ya lo dice. Favicon: la "G" en `favicon.png`. Para cambiar el logo otra vez: reemplazar esos dos archivos con la misma proporción aproximada (o ajustar esos estilos) y regenerar los PDF de `carta impresa/`.

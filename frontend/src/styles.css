@@ -199,6 +199,26 @@ h1, h2, h3, p { margin: 0; }
 .menu-head h1 { font-family: var(--font-display); font-weight: 400; font-size: 3.5em; color: var(--gold); letter-spacing: 6px; line-height: 1.1; margin: 10px 0; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
 .menu-head .subtitle { font-size: 1.1em; color: var(--gray-light); font-weight: 300; letter-spacing: 2px; }
 
+/* Banner de promoción del mes (igual que en la sede Food Truck) */
+.promotion { text-align: center; margin: 10px auto 30px; padding: 0 20px; max-width: 800px; }
+.promotion-badge {
+  display: inline-block; padding: 12px 30px; margin-bottom: 20px; border-radius: 30px;
+  background: var(--grad-gold); color: var(--black); font-family: var(--font-display); font-size: 1.5em; letter-spacing: 3px;
+  box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4); animation: pulse-glow 2s ease-in-out infinite;
+}
+.promotion-badge i { display: inline-block; margin: 0 10px; animation: rotate-star 3s linear infinite; }
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4); transform: scale(1); }
+  50% { box-shadow: 0 12px 32px rgba(255, 215, 0, 0.6); transform: scale(1.02); }
+}
+@keyframes rotate-star { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.promotion-img {
+  display: block; margin: 0 auto; width: 85%; max-width: 450px; height: auto; border-radius: 16px;
+  border: 3px solid var(--gold-dark); box-shadow: 0 8px 32px rgba(255, 215, 0, 0.25); transition: var(--transition);
+}
+.promotion-img:hover { transform: translateY(-5px); box-shadow: 0 12px 48px rgba(255, 215, 0, 0.35); }
+.promotion-text { margin-top: 15px; color: var(--gray-light); font-size: 1.05em; font-style: italic; }
+
 .menu-main { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
 .menu-title { font-family: var(--font-display); font-weight: 400; font-size: 3em; color: var(--gold); text-align: center; letter-spacing: 4px; margin-bottom: 40px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
 
@@ -297,6 +317,9 @@ h1, h2, h3, p { margin: 0; }
 
 @media (max-width: 768px) {
   .menu-head h1 { font-size: 2.5em; letter-spacing: 4px; }
+  .promotion-badge { font-size: 1.2em; padding: 10px 20px; letter-spacing: 2px; }
+  .promotion-img { max-width: 100%; }
+  .promotion-text { font-size: 0.95em; padding: 0 10px; }
   .menu-head .subtitle { font-size: 0.95em; }
   .menu-head .logo { width: min(280px, 82%); }
   .menu-title { font-size: 2.2em; }

@@ -30,6 +30,16 @@ export default function Menu() {
         <p className="subtitle">Comida Gourmet con Actitud</p>
       </header>
 
+      <section className="promotion" aria-label="Promoción del mes">
+        <div className="promotion-badge">
+          <i className="fas fa-star" aria-hidden="true" />
+          <span>PROMOCIÓN DEL MES</span>
+          <i className="fas fa-star" aria-hidden="true" />
+        </div>
+        <img src="/images/promocion.jpeg" alt="Promoción del mes de GOSA" className="promotion-img" />
+        <p className="promotion-text">¡Oferta válida todo el mes! No te la pierdas</p>
+      </section>
+
       <main className="menu-main">
         <h2 className="menu-title">NUESTRO MENÚ</h2>
         {error && <p className="notice err" role="alert">{error}</p>}
