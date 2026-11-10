@@ -1,164 +1,156 @@
-# GOSA Local — Menú digital + POS de comandas (sede 2)
+# GOSA Parrilla — Menú digital y sistema de pedidos (sede 2)
 
-Sistema para la **segunda sede de GOSA**: deja de ser food truck y pasa a ser un **local**. Debe sentirse como una **extensión tipo franquicia** de la sede 1: misma identidad visual (paleta, tipografías, logo, estilo de tarjetas y etiquetas) y la misma carta, que se irá ajustando.
+Sistema para la **segunda sede de GOSA**: deja de ser food truck y pasa a ser un **local** ("GOSA Parrilla"). Debe sentirse como una **extensión tipo franquicia** de la sede 1: misma identidad visual (paleta, tipografías, estilo de tarjetas y etiquetas), carta parecida pero con precios y productos propios.
 
-**Repositorio:** https://github.com/Cristian1823/gosa-parrila (rama `main`, **público**). `sede2-sheets/config.js` (URL del Apps Script y PIN) está en `.gitignore` y no se sube; al clonar hay que crearlo desde `config.example.js`.
+**Repositorio:** https://github.com/Cristian1823/gosa-parrila (rama `main`, **público**). Cada `git push` a `main` redespliega los sitios en Cloudflare. `sede2-sheets/config.js` (URL del Apps Script y PIN) está en `.gitignore` y no se sube; al clonar hay que crearlo desde `config.example.js`.
 
-## Qué incluye
+## Estado actual (nov 2026)
 
-1. **Menú digital** (`/`) — público, de **solo lectura** (el cliente no pide desde aquí; pide al mesero). Se publicará en **Cloudflare Pages** y se llegará por QR.
-2. **Carta imprimible** (`/carta`) — documento aparte para imprimir (Carta/Letter), mismos estilos, sin interacción. Lee la misma base de datos.
-3. **POS local** (`/pos/*`) — toma de pedidos (mesero), cocina y pagos. Corre **solo en la red local** del restaurante.
-4. **Comandas** (pendiente) — impresión del pedido en cocina con impresora térmica ESC/POS y apertura de cajón al cobrar en efectivo.
+Dos sistemas conviven por fases:
 
-**Dos sistemas conviven por fases:**
-- **Fase 1 (ahora): `sede2-sheets/`** — copia del sistema de la sede 1 (menú, pedidos, cocina, Para pago, ventas, cierre) con la carta y precios de la sede 2 y **Google Sheets + Apps Script como backend**. Es lo que pidió el cliente porque aún no tiene el computador del POS. Ver `sede2-sheets/README.md`.
-- **Fase 2 (después): POS local** — `backend/` (FastAPI + SQLite) + `frontend/` (React), con comandas. Es el sistema descrito en el resto de este archivo; el menú React (`/`) y la carta imprimible (`/carta`) ya existen ahí.
+- **Fase 1 — EN PRODUCCIÓN: `sede2-sheets/`.** Copia del sistema de la sede 1 (menú, pedidos, cocina, Para pago, ventas, cierre) con la carta de la sede 2 y **Google Sheets + Apps Script como backend**. Es lo que pidió el cliente porque aún no tiene el computador del POS. Ver `sede2-sheets/README.md`.
+- **Fase 2 — futura: POS local.** `backend/` (FastAPI + SQLite) + `frontend/` (React), con comandas impresas. Hoy de ahí **se usan** el menú digital React (`/`) y la carta imprimible (`/carta`); el POS React (`/pos/*`) existe pero no se usa todavía.
+
+| Sitio | Dirección | Qué es |
+|---|---|---|
+| Menú público (QR) | https://gosa-parrila.pages.dev | Proyecto de Cloudflare Pages `gosa-parrila`: `node build.js menu` → `dist/menu` |
+| Sistema interno (meseros) | https://gosa-pos.pages.dev | Proyecto `gosa-pos`: `node build.js pos` → `dist/pos`. La raíz abre Pedidos. **Sin Cloudflare Access todavía**: cualquiera con la dirección puede entrar |
+
+Ambos con Root directory `sede2-sheets`. Verificado en vivo: el menú publica las 7 categorías y el sistema carga los 57 productos desde la hoja de Google.
 
 ## Decisiones tomadas (no re-discutir sin motivo)
 
-- **Fase 2 — backend gratuito y local:** FastAPI + SQLite en un PC del local. Los celulares de meseros se conectan por Wi-Fi/router al IP del PC (ej. `http://192.168.x.x:8000/pos/pedidos`). Recomendado: router en el local, PC por cable, IP fija por reserva DHCP, puerto 8000 abierto en el firewall de Windows, red Wi-Fi del POS separada de la de clientes. (La zona Wi-Fi móvil de Windows sirve solo como plan B.)
-- **Tiempo real:** hoy cocina y caja consultan cada 5 s (`usePolling`). **Pendiente** cambiar a WebSockets.
-- **Menú público en Cloudflare Pages:** sitio estático que lee un `menu.json` generado desde la base de datos con un paso "Publicar menú" (único paso que requiere internet). **Pendiente** de construir. Así la base de datos del local nunca queda expuesta.
-- **Sin factura por ahora.** El cliente quiere **comandas** (ticket de cocina), no facturación DIAN. Si luego facturan, se conecta un proveedor tecnológico (Alegra, Siigo, Factus, Matías…) sobre el mismo flujo de cobro. Un ticket de comanda **no** es factura.
-- **Google Sheets:** la fase 1 SÍ lo usa (decisión del cliente por no tener aún el PC); el POS local de la fase 2 no (Sheets es lento, sin autenticación y con cuotas). Posible migración futura a Postgres (Supabase) si quieren reportes unificados de ambas sedes; el código usa SQL plano.
+- **Google Sheets en la fase 1** (decisión del cliente por no tener aún el PC). El POS local de la fase 2 no lo usa (Sheets es lento, sin autenticación y con cuotas). Posible migración futura a Postgres (Supabase) para reportes de ambas sedes; el código de la fase 2 usa SQL plano.
+- **Fase 2 — backend gratuito y local:** FastAPI + SQLite en un PC del local; los celulares se conectan por Wi-Fi al IP del PC (`http://192.168.x.x:8000/pos/pedidos`). Recomendado: router en el local, PC por cable, IP fija por reserva DHCP, puerto 8000 abierto en el firewall, red del POS separada de la de clientes. Tiempo real: hoy sondeo cada 5 s (`usePolling`); **pendiente** WebSockets.
+- **Dos sitios separados** (menú público / sistema interno) para que el menú del QR no lleve la URL del backend ni los PIN. El menú usa los precios escritos en su HTML (se regeneran con `tools/generar_sede2.py`); solo toma precios de la hoja si se define `MENU_API_URL`.
+- **Sin factura por ahora.** El cliente quiere **comandas** (ticket de cocina), no facturación DIAN. Si luego facturan, se conecta un proveedor tecnológico (Alegra, Siigo, Factus, Matías…). Un ticket de comanda **no** es factura.
+- **Sin Ahumados** (decisión del cliente). Sin inventario ni sellos de clientes en la fase 1.
 
 ## Stack
 
-- Frontend: React 18 + Vite 5 + react-router-dom 6 (JS/JSX, sin TypeScript). CSS propio (`src/styles.css`, `src/pages/carta.css`). Font Awesome 6 por CDN (iconos del menú público).
-- Backend: FastAPI + SQLite (`backend/gosa.db`, se crea sola) + pydantic 2. Un solo proceso sirve también `frontend/dist` si existe.
-- Entorno de desarrollo: Windows 11, Python 3.11 (venv en `backend/.venv`), Node 22.
+- Fase 2: React 18 + Vite 5 + react-router-dom 6 (JS/JSX, sin TypeScript); FastAPI + SQLite + pydantic 2. Font Awesome 6 por CDN.
+- Fase 1: HTML/CSS/JS estático (sin build, salvo `build.js` para desplegar) + Google Apps Script.
+- Desarrollo: Windows 11, Python 3.11 (venv en `backend/.venv`), Node 22. Herramientas puntuales fuera del proyecto: `pypdf`, `segno`, `opencv-python-headless`, Pillow.
 
 ## Estructura
 
 ```
 backend/
-  main.py          API, esquema SQLite, migración/seed
-  menu_seed.py     CARTA (fuente de datos de productos, precios, etiquetas, variantes)
-  requirements.txt
-frontend/
+  main.py          API, esquema SQLite, migración/seed (PRAGMA user_version)
+  menu_seed.py     CARTA: única fuente de productos, precios, etiquetas y variantes
+frontend/          React (fase 2)
   public/logo.jpg  logo horizontal "GOSA PARRILLA" (recortado); favicon.png = la "G"
-assets/            logo-gosa-parrilla-original.jpeg: el archivo original que entregó el cliente (1536x1024)
-  public/images/   fondos de categoría, bebidas.jpeg y promocion.jpeg (banner del mes)
-  src/main.jsx     rutas
+  public/images/   fondos de categoría, bebidas.jpeg, promocion.jpeg (banner del mes)
   src/lib.js       api, money, usePolling, slug, groupMenu
   src/styles.css   tokens de marca + POS + menú digital
-  src/components/Bits.jsx   Sidebar/PosLayout/Title/iconos
-  src/pages/Menu.jsx        menú digital (acordeón, solo lectura)
-  src/pages/Carta.jsx + carta.css   carta imprimible
-  src/pages/Pedidos.jsx, Cocina.jsx, Pagos.jsx   POS
-sede2-sheets/      FASE 1: sistema estático + Google Sheets (pedidos, cocina, cierre...). Ver su README.md
-  build.js         prepara dist/menu y dist/pos para Cloudflare Pages; genera config.js desde variables de entorno
-tools/generar_sede2.py   genera desde backend/menu_seed.py: menu-data.js, index.html y los CSV de sede2-sheets/
-qr-menu/           QR del menú público (png, svg) y cartel A5 con logo (html, pdf, png). Lo genera tools/generar_qr.py
-carta impresa/     PDFs de muestra (fondo negro / blanco), foto de la carta de ese día
-gosa food truck/   SEDE 1 — SOLO REFERENCIA (ver abajo). No se versiona.
+  src/pages/       Menu.jsx (menú digital), Carta.jsx + carta.css (carta imprimible), Pedidos/Cocina/Pagos.jsx (POS)
+sede2-sheets/      FASE 1 (producción). README.md con el paso a paso
+  index.html, menu-data.js, hoja-google/*.csv    GENERADOS por tools/generar_sede2.py (no editar a mano)
+  pedidos|cocina|domicilio|ventas|cierre.html, sistema.js, sistema.css   sistema interno
+  google-apps-script.js    backend; el bloque <GENERADO:CATALOGO> lo reescribe el generador
+  build.js         prepara dist/menu y dist/pos para Cloudflare; genera config.js desde variables de entorno
+  config.example.js  plantilla (config.js real: git-ignorado)
+tools/
+  generar_sede2.py     genera lo de arriba desde backend/menu_seed.py + costos
+  costos_sede1.csv     hoja Productos de la sede 1 tal como la envió el cliente (fuente de costos)
+  generar_qr.py        QR del menú y cartel
+assets/            logo-gosa-parrilla-original.jpeg (original entregado por el cliente, 1536x1024)
+qr-menu/           QR (png, svg) y cartel A5 (html, pdf, png) hacia https://gosa-parrila.pages.dev
+carta impresa/     PDFs de la carta (fondo negro / blanco)
+gosa food truck/   SEDE 1 — SOLO REFERENCIA (ver abajo). No se versiona
 README.md          viene del paquete base gosa-pos; parcialmente desactualizado
 ```
 
 ## Cómo correrlo (desarrollo)
 
+**Fase 1 (sistema en Google Sheets):** Live Server sobre `sede2-sheets` (`.vscode/settings.json`, local y no versionado, fija `liveServer.settings.root` en `/sede2-sheets`): `http://127.0.0.1:5501/pedidos.html`. Necesita su `config.js` local; lo que se haga queda guardado en la hoja real.
+
+**Fase 2 (React + API):**
+
 ```powershell
-# Terminal 1 — API
-cd backend
-.\.venv\Scripts\python.exe -m uvicorn main:app --port 8000
-# Terminal 2 — Frontend
-cd frontend
-npm run dev        # http://localhost:5173  (proxy /api -> :8000)
+cd backend;  .\.venv\Scripts\python.exe -m uvicorn main:app --port 8000
+cd frontend; npm run dev        # http://localhost:5173  (proxy /api -> :8000)
 ```
 
-- Abrir **siempre** por Vite (5173) o por la API con `npm run build` hecho (8000). **Live Server no funciona**: no compila JSX y la página sale en blanco.
-- Instalación inicial: `python -m venv .venv`, `pip install -r requirements.txt` en `backend`; `npm install` en `frontend`.
-
-## Rutas
-
-| Ruta | Para | Función |
-|---|---|---|
-| `/` | Clientes (QR) | Menú digital solo lectura |
-| `/carta` | Dueño/impresión | Carta imprimible. `?tema=claro` (blanco, ahorra tinta) / `?tema=oscuro` (marca) |
-| `/pos/pedidos` | Mesero/caja | Toma de pedidos (mesa 1–8 o para llevar) |
-| `/pos/cocina` | Cocina | Tablero Nuevos → Preparando → Listos |
-| `/pos/pagos` | Caja | Cobro: propina, método (efectivo/tarjeta/nequi), cambio |
-
-API: `GET /api/menu`, `POST /api/orders`, `GET /api/orders`, `PATCH /api/orders/{id}/status`, `POST /api/orders/{id}/pay`. Los precios los toma siempre el servidor desde `menu_items`.
+- Abrir **siempre** por Vite (5173). **Live Server no sirve** para el React: no compila JSX y sale en blanco.
+- Instalación inicial: `python -m venv .venv` + `pip install -r requirements.txt` en `backend`; `npm install` en `frontend`.
+- Rutas React: `/` menú digital · `/carta` carta imprimible (`?tema=claro|oscuro`) · `/pos/pedidos`, `/pos/cocina`, `/pos/pagos`. API: `GET /api/menu`, `POST/GET /api/orders`, `PATCH /api/orders/{id}/status`, `POST /api/orders/{id}/pay`; los precios los toma siempre el servidor.
 
 ## Datos y carta
 
-- Tabla `menu_items(cat, name, description, price, active, sort, badge, parent_id)`.
-  - `badge`: etiqueta inclinada (PREMIUM, POPULAR, NUEVO, ESPECIAL, LA REINA, MUNDIALISTA).
-  - `parent_id`: las variantes (Doble, Triple) son **productos propios** enlazados a su plato base. En el menú público cuelgan de la tarjeta del plato; en el POS aparecen como productos normales.
-- **La carta vive en `backend/menu_seed.py`.** Categorías actuales (orden de la sede 1, **sin Ahumados** por decisión del cliente): Entradas, Perros, Hamburguesas, Salchipapas, **Platos a la carta**, Adicionales, Bebidas. Los precios vigentes son los del PDF del cliente `precios gosa para carta.pdf` (nov 2026, no versionado); lo que no aparece en ese PDF se retiró (Totopos, Tender, 360 Hamburguer, Mozzarella, Salchicha simple).
-- **Ojo con el seed:** `init_db()` reemplaza toda la carta solo cuando `PRAGMA user_version < 6`. Editar `menu_seed.py` **no** cambia una base ya creada: hay que subir ese número en `main.py` (reseed destructivo de `menu_items`; los pedidos guardan nombre y precio, no FK, así que no se pierden) o editar la tabla. **Pendiente:** panel de administración para editar la carta sin tocar código.
-- Precios de Bebidas: salen del respaldo del sistema de pedidos de la sede 1 (`sistema.js`), no de la hoja real; verificar con el cliente. En el menú público Bebidas se muestra como **imagen** (como en la sede 1); los 12 productos existen para el POS y la carta impresa los lista.
-
-### Precios vigentes (nov 2026)
-
-- Base: PDF del cliente. Luego el cliente pidió **+$1.000 a todos los productos excepto las hamburguesas** (ya aumentadas antes): se aplicó a Entradas, Perros, Salchipapas, Platos a la carta, Adicionales y **Bebidas** (la nota del combo $6.500/$8.000/$7.500 **no** se tocó). Hamburguesas: +$1.000 en sencilla, doble y triple.
-- `user_version` actual: **8**. Los dos últimos Platos (`Chuleta Gosa` $27.000 y `Gosa Black Ribs` $29.000, IDs `pl7` y `pl8`) se agregaron con el precio que dio el cliente, sin el +$1.000, y van **al final** de la categoría para no mover los IDs existentes (los IDs son por orden dentro de la categoría: insertar a la mitad rompe la correspondencia con la hoja de Google).
-
-### Sistema en Google Sheets (fase 1)
-
-- Es la sede 1 portada: `sede2-sheets/` copia pedidos/cocina/domicilio(Para pago)/ventas/cierre + `google-apps-script.js`. Se **quitó** inventario y sellos de clientes; `IDS_AHUMADOS = []` y el selector TOTAL/GOSA/AHUMADOS del cierre queda oculto (una sola línea).
-- El catálogo y el menú público se **generan** (`tools/generar_sede2.py`); el sistema de pedidos toma precios de la hoja `Productos` (la hoja manda sobre `menu-data.js`). El **nombre** del producto en la hoja debe coincidir con el de los pedidos (el cierre cruza por nombre) y la `Categoria` debe ser una clave de `MENU`: `entradas, perros, hamburguesas, salchipapas, platos, adicionales, bebidas`.
-- **Costos:** `tools/costos_sede1.csv` es la hoja Productos de la sede 1 tal como la envió el cliente; `tools/generar_sede2.py` la cruza por (categoría, nombre) —con alias para 4 bebidas escritas distinto— y escribe Costo/GastoOperativo/Sueldos en `CATALOGO_INICIAL` y en `hoja-google/Productos.csv`. Solo se toman esos 3 campos (precios, IDs y Activo de la sede 1 se ignoran). `completarCostos()` del Apps Script rellena una hoja ya creada **solo en celdas vacías**. **Ojo:** esos costos son datos comerciales y están dentro de `google-apps-script.js`, de `hoja-google/Productos.csv` y de `tools/costos_sede1.csv`. El repositorio es **público** y el cliente lo subió sabiéndolo (nov 2026), así que esos costos son visibles en GitHub y en el historial. Quitarlos después exige reescribir el historial y aun así pudieron copiarse.
-- **Productos nuevos en una hoja existente:** `agregarProductosNuevos()` (a mano) agrega al final los de `CATALOGO_INICIAL` cuyo ID no esté en la hoja, sin tocar filas existentes ni duplicar por nombre. Tras agregar productos a `menu_seed.py`: subir `user_version`, correr `tools/generar_sede2.py`, `git push` (Cloudflare redespliega el menú) y ejecutar esa función en Apps Script.
-- **Las hojas las crea el Apps Script:** `configurarHojas()` (se ejecuta a mano una vez) y `asegurarHojas()` (se llama al inicio de cada `doGet`) crean `Pedidos`, `Productos` (con la carta, costos vacíos) y `Sueldos` con sus encabezados si faltan, y borran la "Hoja 1" vacía. No sobrescriben hojas existentes. El catálogo inicial es el bloque `<GENERADO:CATALOGO>` del script, que reescribe `tools/generar_sede2.py` (no editarlo a mano). Probado con un `SpreadsheetApp` simulado (17 comprobaciones), **no** contra Google real.
-- **QR del menú:** `qr-menu/` apunta a `https://gosa-parrila.pages.dev` (el menú público en Cloudflare). Se regenera con `pip install segno` y `python tools/generar_qr.py [direccion]`; el PDF del cartel se saca imprimiendo `qr-menu/cartel.html` con Edge (`--print-to-pdf`, A5). Verificado: el PNG y la captura del cartel se leen con OpenCV y devuelven la dirección exacta. **Ojo:** el QR guarda la dirección; si el menú cambia de dirección (p. ej. dominio propio) hay que regenerar y reimprimir.
-- **Despliegue (Cloudflare Pages, desde GitHub):** dos proyectos del mismo repo con Root directory `sede2-sheets`. Menú: `node build.js menu` -> `dist/menu`. Sistema: `node build.js pos` -> `dist/pos`, con variables `API_URL` (obligatoria; el build falla sin ella), `PIN_CIERRE`, `PIN_ELIMINAR`, `MENU_URL`. `build.js` genera `config.js` (que no está en git) desde esas variables y deja fuera el script con costos, los CSV y el README. El menú público NO lleva la URL del backend salvo que se defina `MENU_API_URL`. Cambiar una variable exige redesplegar. Probado con construcciones locales (casos de error, árbol de salida y 70 referencias sin romper); **no** desplegado todavía en Cloudflare.
-- **PIN y URL en `sede2-sheets/config.js`** (git-ignorado; plantilla `config.example.js`). Los PIN de la sede 1 NO se copiaron: el cliente define los nuevos; vacío = función bloqueada.
-- Verificado con un servidor de prueba que imita el Apps Script (no está en el repo): pedidos, cocina, Para pago, ventas, menú público y el candado del cierre (PIN malo rechazado, PIN bueno abre). **No** se ha probado contra Google real ni el cálculo completo del cierre (depende del Apps Script desplegado y de los costos).
-- Tras cambiar la carta: `backend\.venv\Scripts\python.exe tools\generar_sede2.py`, resubir el sitio y actualizar la hoja `Productos`.
+- **Fuente única: `backend/menu_seed.py`.** Categorías (orden de la sede 1): Entradas, Perros, Hamburguesas, Salchipapas, Platos a la carta, Adicionales, Bebidas. 57 productos. Las variantes (Doble, Triple) son productos propios enlazados por `parent_id`; `badge` es la etiqueta inclinada (PREMIUM, POPULAR, ESPECIAL, LA REINA, NUEVO…).
+- **Precios (nov 2026):** base = PDF del cliente `precios gosa para carta.pdf` (no versionado); lo que no estaba se retiró (Totopos, Tender, 360 Hamburguer, Mozzarella, Salchicha simple). Luego **+$1.000 a todo menos hamburguesas** (que ya se habían subido; en sencilla, doble y triple), incluidas las Bebidas; la nota del combo ($6.500 / $8.000 / $7.500) no se tocó. `Chuleta Gosa` ($27.000) y `Gosa Black Ribs` ($29.000) se agregaron con el precio dado, sin el +$1.000.
+- **Los IDs son por orden dentro de la categoría** (`e1…`, `pl1…`, variantes con sufijo `d`/`t`) y son la llave con la hoja de Google: **los productos nuevos van siempre al final de su categoría**; insertar a la mitad corre los IDs y rompe la correspondencia.
+- **Ojo con el seed de la fase 2:** `init_db()` reemplaza la carta solo cuando `PRAGMA user_version` es menor al número del código (**hoy 8**). Editar `menu_seed.py` no cambia una base ya creada: hay que subir ese número (reseed destructivo de `menu_items`; los pedidos guardan nombre y precio, no FK).
+- Bebidas: precios del respaldo de la sede 1 (+$1.000); en el menú público se muestra como **imagen**, los 12 productos existen para el sistema y la carta impresa.
 
 ### Cómo actualizar la carta (flujo probado)
 
-1. Editar `backend/menu_seed.py` (nombre, descripción, precio, etiqueta, variantes).
-2. Subir `PRAGMA user_version` en `backend/main.py` (el valor actual es **6**; el seed corre cuando es menor) y **reiniciar la API** (matar `python.exe` y `python3.11.exe`).
-3. El menú digital (`/`) y la carta (`/carta`) leen `/api/menu`: no requieren más cambios. Para la fase 1 (Sheets) correr además `tools/generar_sede2.py`.
-4. **Categoría nueva:** registrar su slug (ej. `platos-a-la-carta`) en tres sitios: `HEADER_BG` e `ICONS` en `Menu.jsx`, `BANDS` en `Carta.jsx`, y las clases `.header-<slug>` (`styles.css`) y `.band-<slug>` (`carta.css`) con su foto en `frontend/public/images/`. Sin eso la categoría sale con cabecera plana.
-5. Regenerar los PDF de `carta impresa/` (Edge headless, ver Convenciones) y revisar que sigan en 3 páginas y que ninguna categoría se parta.
+1. Editar `backend/menu_seed.py` (nuevos al final de su categoría).
+2. Subir `user_version` en `backend/main.py` y reiniciar la API (matar `python.exe` **y** `python3.11.exe`).
+3. `backend\.venv\Scripts\python.exe tools\generar_sede2.py` (regenera menú estático, catálogo y CSV; avisa qué productos quedan sin costo).
+4. Regenerar los PDF de `carta impresa/` (Edge headless sobre `/carta`) y comprobar que siguen en **3 páginas** y que ninguna categoría se parte.
+5. `git push` → Cloudflare redespliega el menú público y el sistema.
+6. En Apps Script: pegar el `google-apps-script.js` nuevo y ejecutar **`agregarProductosNuevos`** (los precios de productos existentes se cambian directo en la hoja `Productos`).
+7. **Categoría nueva:** registrar su slug en `HEADER_BG` e `ICONS` (`Menu.jsx`), `BANDS` (`Carta.jsx`), `CATS` (`tools/generar_sede2.py`) y las clases `.header-<slug>` / `.band-<slug>` con su foto; en el estático, `.accordion-header-<slug>` en `sede2-sheets/style.css`.
+
+## Sistema en Google Sheets (fase 1)
+
+- **Qué se quitó de la sede 1:** inventario y sellos. `IDS_AHUMADOS = []` y el selector TOTAL/GOSA/AHUMADOS del cierre queda oculto (una sola línea).
+- **La hoja manda:** el sistema toma precios de la pestaña `Productos` (sobre `menu-data.js`). El **nombre** del producto debe coincidir con el de los pedidos (el cierre cruza por nombre) y `Categoria` debe ser clave de `MENU`: `entradas, perros, hamburguesas, salchipapas, platos, adicionales, bebidas`.
+- **Apps Script** (se despliega a mano desde el editor; la URL de la implementación no cambia si se usa *Editar → Nueva versión*). Funciones que se ejecutan a mano desde el editor: `configurarHojas()` (crea `Pedidos`, `Productos` con carta y costos, `Sueldos`; `asegurarHojas()` lo hace solo en cada petición), `completarCostos()` (rellena Costo/Gasto/Sueldos **solo en celdas vacías**) y `agregarProductosNuevos()` (agrega al final los productos del catálogo que falten, sin tocar ni duplicar por nombre). Probado con un `SpreadsheetApp` simulado (36 comprobaciones) y con lecturas reales (57 productos, `Pedidos` y `Sueldos` presentes); **falta** probar un pedido completo contra la hoja real y el cálculo del cierre.
+- **Costos:** `tools/costos_sede1.csv` se cruza por (categoría, nombre) —con alias para 4 bebidas escritas distinto— y escribe Costo/GastoOperativo/Sueldos en `CATALOGO_INICIAL` y en `hoja-google/Productos.csv`. 45 de 57 productos tienen costo; **sin costo:** Bucaro, Salchi Bucara, los 8 Platos a la carta, Chimichurri y Queso Doble Crema.
+- **Despliegue:** `build.js` genera `config.js` desde variables de entorno de Cloudflare y deja fuera el script con costos, los CSV y el README. Proyecto `gosa-pos`: `API_URL` (obligatoria; el build **falla** sin ella o si es inválida), `PIN_CIERRE`, `PIN_ELIMINAR` (4 dígitos; vacío = función bloqueada), `MENU_URL`. Cambiar una variable exige *Retry deployment*. El sitio interno sale con `noindex`, sin caché, y `/` redirige a `/pedidos.html`.
+- **QR:** `qr-menu/` (ver `tools/generar_qr.py`; `pip install segno`; el PDF del cartel sale de imprimir `cartel.html` con Edge). Verificado con OpenCV. **El QR guarda la dirección**: si el menú cambia de dirección (p. ej. dominio propio) hay que regenerarlo y reimprimir.
+- **Seguridad (límites conocidos):** los PIN viven en `config.js` y son visibles en el sitio estático; la URL del Apps Script no pide autenticación (quien la tenga puede leer y modificar pedidos); la toma de pedidos no pide PIN. Los costos son datos comerciales y están dentro de `google-apps-script.js`, `Productos.csv` y `tools/costos_sede1.csv`: **el repositorio es público** y el cliente lo subió sabiéndolo, así que son visibles en GitHub y en el historial.
 
 ## Diseño (réplica de la sede 1)
 
-Tokens en `:root` de `src/styles.css`, idénticos a la sede 1:
-- Fondo `#000`, panel `#141414`, dorado `#FFD700` / `#FFC107`, texto `#fff`, gris claro `#E0E0E0`, bordes `#4B4B4B`, éxito `#28a745`, aviso/naranja `#ff6b35`.
-- Tipografías: **Bebas Neue** (títulos, precios, botones) + **Inter** (texto).
-- Logo horizontal "GOSA PARRILLA" (dorado sobre negro, sin marco circular) y marca de agua al 5 % de fondo; tarjetas con barrido dorado al hover; etiquetas dorado inclinadas -2°; precios en pastilla gris; botones con gradiente dorado; chips en forma de pastilla.
-- Menú digital: acordeón por categoría con foto de cabecera (90 px, velo oscuro 45 %) y mismos iconos Font Awesome. Perros lleva una burbuja "¡HAZLO COMBO!" (bebida del día $6.500, Coca-Cola $8.000, Postobón $7.500); la burbuja "¡ADICIÓN! +$5.000 salchicha americana" (con la imagen de la vaca) se **retiró** por pedido del cliente (nov 2026). Platos a la carta usa como cabecera la foto de parrilla (`fondo-platos.jpeg`).
-- Carta impresa: hoja Letter, dos columnas, `break-inside: avoid` por categoría (hoy 3 páginas: Entradas+Perros / Hamburguesas+Salchipapas+Platos a la carta / Adicionales+Bebidas). Requiere "Gráficos de fondo" activado al imprimir.
+- Tokens en `:root` de `src/styles.css`, idénticos a la sede 1: fondo `#000`, panel `#141414`, dorado `#FFD700` / `#FFC107`, texto `#fff`, gris `#E0E0E0`, bordes `#4B4B4B`, éxito `#28a745`, aviso `#ff6b35`. Tipografías **Bebas Neue** (títulos, precios, botones) + **Inter**.
+- **Logo** horizontal "GOSA PARRILLA" (dorado sobre negro), sin marco circular ni título "GOSA" en texto (el logo ya lo dice) y marca de agua al 5 %. Para cambiarlo: reemplazar `frontend/public/logo.jpg` y `sede2-sheets/images/logo.jpeg` (mismos nombres, proporción similar o ajustar `.logo`, `.c-logo`, `header img`, `.sistema-header .logo`, `.logo-pin`), más `favicon.png`; regenerar PDFs y QR-cartel.
+- Menú: acordeón por categoría con foto de cabecera (90 px, velo 45 %), tarjetas con barrido dorado, etiquetas inclinadas -2°, precios en pastilla gris. Perros lleva la burbuja "¡HAZLO COMBO!"; la de "¡ADICIÓN! salchicha americana" se **retiró** (pedido del cliente). Platos a la carta usa la foto de parrilla.
+- **Banner "PROMOCIÓN DEL MES"** entre el encabezado y el menú (imagen `promocion.jpeg` en `frontend/public/images/` y `sede2-sheets/images/`; no está en la carta imprimible). Hoy es la promo de **noviembre de la sede 1**, cuyo arte dice "GOSA Food Truck"; cambia cada mes: reemplazar esos dos archivos y hacer push.
+- **Carta impresa:** hoja Letter, 2 columnas, `break-inside: avoid` por categoría; 3 páginas (Entradas+Perros / Hamburguesas+Salchipapas+Platos / Adicionales+Bebidas). Requiere "Gráficos de fondo" al imprimir.
 
 ## Pendientes / hoja de ruta
 
-0. **Fase 1 — esperando al cliente:** los **costos de los 12 productos nuevos** (Bucaro, Salchi Bucara, 8 Platos a la carta, Chimichurri, Queso Doble Crema; el resto ya tiene costo copiado de la sede 1), la revisión de costos dudosos (bebidas con costo 0, Quatro 1.5 L) y los **PIN nuevos** (cierre y eliminar; mientras `PIN_*` esté vacío en `config.js` esas funciones quedan bloqueadas). **Ya conectado:** el Apps Script nuevo está desplegado y `sede2-sheets/config.js` (git-ignorado, la URL no va en este archivo) apunta a él; se comprobó con lecturas reales que devuelve los 55 productos y que `Pedidos` y `Sueldos` existen y están vacías. **Falta:** probar un pedido completo de punta a punta (crear, cocina, cobrar, cierre) contra la hoja real, y **crear en Cloudflare los dos proyectos de Pages** (menú público `gosa-menu` y sistema interno `gosa-pos`) con la configuración y variables de `sede2-sheets/README.md` (sección Despliegue); proteger `gosa-pos` con Cloudflare Access. Pendiente definir WhatsApp/horario/dirección (constantes en `tools/generar_sede2.py`).
-1. Panel de administración con login para editar carta y precios (+ exportar ventas a CSV/Excel).
-2. **WebSockets** en cocina/caja (reemplazar sondeo de 5 s).
-3. **Comandas:** impresión ESC/POS (`python-escpos`) en impresora térmica de cocina; opcional varias impresoras por zona; apertura de cajón al cobrar en efectivo. Preguntas abiertas: marca/modelo, USB o red, 58 u 80 mm, una o varias impresoras, si se mantiene el tablero en pantalla.
-4. **Publicar menú** estático en Cloudflare Pages (`menu.json` + botón/comando "Publicar menú"); cuenta de Cloudflare pendiente.
-5. **Login/PIN** para `/pos/*` y endpoints de cocina/pago (hoy abiertos; la red del POS debe ser interna).
-6. Sin impuestos (impoconsumo 8 %) ni facturación electrónica por ahora.
-7. **Banner de promoción:** cargado el de la sede 1 (nov 2026, a pedido del cliente): `frontend/public/images/promocion.jpeg` y `sede2-sheets/images/promocion.jpeg`, con la insignia "PROMOCIÓN DEL MES" y el texto "¡Oferta válida todo el mes!" entre el encabezado y el menú (`Menu.jsx` y el generador `tools/generar_sede2.py`; estilos `.promotion*`). **Ojo:** esa imagen es la promo de noviembre de la sede 1 y su arte dice "GOSA Food Truck"; cambia cada mes. Para actualizarla, reemplazar esos dos archivos (mismo nombre) y hacer push. No está en la carta imprimible. El carrusel de videos y Ahumados siguen **sin traer**.
-8. Marcadores sin completar: `[HORARIO]` y `[DIRECCIÓN DEL LOCAL]` (pie de `Menu.jsx`), `[CAJERO]` (`Bits.jsx`); `INFO` en `Carta.jsx` (horario/dirección vacíos; redes copiadas de la sede 1: @gosa_ft, @gosa.food.truck — confirmar si el local tiene cuentas propias). Nombre del local: **GOSA Parrilla** (según el logo nuevo; el título del menú usa solo el logo y el pie dice "GOSA Parrilla ©").
-9. **Confirmar con el cliente** (valores del PDF dudosos, ya aplicados con una suposición): Queso cheddar adicional `300` → se puso 3.000; Chicharrón adicional `400` → 4.000; nombres `Bucaro` (entrada) vs `Salchi Bucara`; `Gosa Gacuho` (¿Gaucho?); alcance de la nota del combo (se aplicó solo a Perros: el PDF dice "los dos cris"); precios de Bebidas (el PDF no las trae); si Totopos, Tender y 360 Hamburguer salen definitivamente.
-10. **Logo — aplicado (nov 2026):** el cliente entregó el logo nuevo "GOSA PARRILLA" (horizontal). El original está en `assets/logo-gosa-parrilla-original.jpeg`; se recortaron sus márgenes negros con Pillow y se guardó como `frontend/public/logo.jpg` y `sede2-sheets/images/logo.jpeg` (mismos nombres que antes, para no tocar referencias). Los estilos del logo ya no lo recortan en círculo ni le ponen borde (`.logo` en `styles.css`, `.c-logo` en `carta.css`, `header img` en `sede2-sheets/style.css`, `.sistema-header .logo` en `sistema.css`, `.logo-pin` en `cierre.html`); el título "GOSA" en texto se quitó del encabezado porque el logo ya lo dice. Favicon: la "G" en `favicon.png`. Para cambiar el logo otra vez: reemplazar esos dos archivos con la misma proporción aproximada (o ajustar esos estilos) y regenerar los PDF de `carta impresa/`.
-11. **Guardar el avance:** hay cambios sin commit (carta nueva del PDF del cliente, categoría Platos a la carta, perros con "salchicha americana", hamburguesas +$1.000, PDFs regenerados). Hacer commit cuando el usuario lo pida. Tip: si un PDF de `carta impresa/` está abierto en un visor, Windows no deja sobrescribirlo; pedir que lo cierren.
+**Fase 1 — antes de dar el sistema a los meseros**
+1. **Cambiar los PIN:** los del `config.js` local son los mismos de la sede 1, que están en su repositorio público; si se usaron igual en las variables de `gosa-pos`, cambiarlos allá también (y en el `config.js` local) y redesplegar.
+2. **Proteger `gosa-pos` con Cloudflare Access** (Zero Trust → Access → Applications → Self-hosted, política *Allow* con los correos del equipo). Opcional: PIN de meseros para entrar a Pedidos.
+3. **Probar un pedido completo** (crear → cocina → Para pago → ventas → cierre) contra la hoja real y borrar los de prueba.
+4. **Costos:** de los 12 productos sin costo y revisar los dudosos (Coca Cola 1.5 L, 0 1.5 L, Corona y Coronita con costo 0; Quatro 1.5 L con 1.166).
+5. Confirmar con el cliente valores del PDF aplicados con una suposición: Queso cheddar adicional `300` → 3.000; Chicharrón `400` → 4.000; nombres `Bucaro` vs `Salchi Bucara`; `Gosa Gacuho` (¿Gaucho?); si la nota del combo aplica solo a Perros; precios de Bebidas.
+6. Datos del local sin definir: horario, dirección, WhatsApp (constantes `HORARIO`, `DIRECCION`, `WHATSAPP` en `tools/generar_sede2.py`; `INFO` en `Carta.jsx` y `[HORARIO]`/`[DIRECCIÓN DEL LOCAL]` en `Menu.jsx`); redes copiadas de la sede 1 (@gosa_ft, @gosa.food.truck): confirmar si el local tiene propias. `[CAJERO]` en `Bits.jsx`.
+7. Actualizar el banner de promoción cada mes (y su arte, que dice "Food Truck").
+
+**Fase 2 — POS local**
+8. Panel de administración con login para editar carta y precios (+ exportar ventas a CSV/Excel).
+9. **WebSockets** en cocina/caja.
+10. **Comandas:** impresión ESC/POS (`python-escpos`) en impresora térmica; opcional varias por zona; apertura de cajón al cobrar en efectivo. Preguntas abiertas: marca/modelo, USB o red, 58 u 80 mm, una o varias, si se mantiene el tablero en pantalla.
+11. Login/PIN para `/pos/*` y endpoints de cocina/pago (hoy abiertos; la red del POS debe ser interna). Impoconsumo 8 % y facturación electrónica: fuera de alcance por ahora.
 12. Actualizar `README.md` (menciona `?mesa=N` y la carta de ejemplo original).
 
 ## Sede 1 — carpeta `gosa food truck/` (solo referencia)
 
-Sitio estático HTML/CSS/JS + Google Sheets/Apps Script (menú, pedidos, cocina, cobro, cierre, inventario, sellos). Fuente de verdad de la **carta pública**: su `index.html` (el `CLAUDE.md` de esa carpeta tiene algunos precios desactualizados). Sirve para copiar estilos, productos e imágenes.
-- **No versionar ni copiar su `CLAUDE.md`**: contiene PINs y datos sensibles. No reutilizar esos PINs.
-- Tiene videos grandes (`videos/`) e imágenes de promociones propias del truck.
+Sitio estático + Google Sheets/Apps Script (menú, pedidos, cocina, cobro, cierre, inventario, sellos). Fuente de la **carta pública** original: su `index.html` (su `CLAUDE.md` tiene precios desactualizados). Sirve para copiar estilos, productos e imágenes.
+- **No versionar ni copiar su `CLAUDE.md`**: contiene PINs y datos sensibles.
+- Tiene videos grandes (`videos/`) e imágenes de promociones propias del truck; el carrusel de videos no se trajo.
 
 ## Trampas conocidas
 
-- Guardar `styles.css` desde PowerShell con `Set-Content -Encoding UTF8` añade **BOM** y rompe el `@import` de fuentes → los estilos "desaparecen". Usar `[IO.File]::WriteAllText(..., UTF8Encoding($false))` o las herramientas de edición.
-- Al reiniciar la API, una pestaña abierta puede mostrar datos viejos o "Internal Server Error": recargar con Ctrl+F5.
-- **Vite repite el último error de compilación** aunque ya se haya corregido: aparece como capa roja en navegadores nuevos y **queda impresa en los PDF/capturas** (se vio como texto "JSXParser..." al pie de cada página). Si pasa, reiniciar Vite (matar el proceso del puerto 5173 y volver a correr `npm run dev`) antes de generar PDF. Comprobar siempre que `/src/pages/*.jsx` respondan 200.
-- Dos elementos JSX hermanos dentro de `cond && (...)` fallan: envolverlos en un fragmento `<>...</>`.
-- El proceso uvicorn en Windows se ve como `python.exe` del venv + `python3.11.exe`; para reiniciar hay que matar ambos.
+- **El cliente deja archivos sueltos en la raíz del proyecto** (el logo nuevo, PDFs). Antes de `git add -A`, mirar `git status`: una vez se subió a un repositorio público un `logo.jpeg` sin haberlo abierto. "Deje la imagen" suele significar "ya está en la carpeta".
+- Guardar CSS desde PowerShell con `Set-Content -Encoding UTF8` añade **BOM** y rompe el `@import` de fuentes. Usar `[IO.File]::WriteAllText(..., UTF8Encoding($false))` o las herramientas de edición.
+- En scripts Python lanzados desde la terminal, **no escribir `\n`/`\r\n` literales dentro de cadenas** (se convierten en saltos reales y rompen el archivo): usar `chr(10)`/`chr(13)` o editar con las herramientas de edición. Los archivos copiados de la sede 1 son CRLF: respetar el fin de línea al reescribirlos.
+- **Vite repite el último error de compilación** aunque ya esté corregido y queda impreso en PDFs/capturas ("JSXParser…"). Reiniciar Vite antes de generar PDF y comprobar que `/src/pages/*.jsx` den 200.
+- Al reiniciar la API, una pestaña abierta puede mostrar datos viejos o "Internal Server Error": Ctrl+F5. El proceso uvicorn se ve como `python.exe` del venv + `python3.11.exe`; matar ambos.
+- Dos elementos JSX hermanos dentro de `cond && (...)` fallan: usar un fragmento.
+- **Cloudflare Pages:** en el menú (tiene `index.html`) las rutas inexistentes devuelven 200 con el menú, y los archivos borrados pueden seguir saliendo unos minutos por caché de borde: verificar el contenido o usar `?x=<timestamp>`, no solo el código HTTP. Un push tarda 1–2 minutos en verse.
+- Un PDF de `carta impresa/` abierto en un visor impide sobrescribirlo (Windows): pedir que lo cierren.
 
 ## Convenciones
 
 - Español en UI, textos y comentarios. Precios en COP con puntos de miles (`money()` en `lib.js`).
+- **Nunca escribir los PIN ni la URL del Apps Script** en respuestas, commits ni documentos del repositorio.
 - Tap targets ≥ 44 px, `aria-*` en controles, sin dependencias nuevas sin necesidad.
-- Para revisar páginas de un PDF sin visor: instalar `pypdf` **fuera del proyecto** (`PIP_USER=0; pip install --no-user --target <carpeta temporal> pypdf`) y listar primera/última línea de cada página; el texto de títulos con letra espaciada sale con espacios (`E N T R A D A S`), normalizar antes de comparar.
-- Antes de afirmar que algo se ve bien, abrirlo en el navegador; generar PDF con Edge headless (`--print-to-pdf`) para probar la carta impresa.
+- Verificar visualmente antes de afirmar que algo se ve bien (capturas con Edge headless: `--screenshot`, `--print-to-pdf`). Para revisar PDFs sin visor: `pypdf` instalado **fuera del proyecto** (`PIP_USER=0; pip install --no-user --target <carpeta> pypdf`); el texto de títulos con letra espaciada sale con espacios, normalizar antes de comparar.
+- Sistema en Apps Script: probar con un `SpreadsheetApp` simulado en Node antes de pedir al cliente que lo pegue; sus funciones manuales deben ser idempotentes y no pisar datos.
