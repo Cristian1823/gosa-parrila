@@ -50,6 +50,8 @@ SEED_MENU = [
     (PLATOS, "Gosa Bravio", "Exquisita bola de res a la parrilla, acompañada de arepa, papas a la francesa y chimichurri para darle el toque perfecto.", 25500, "", []),
     (PLATOS, "Gosa Gatrine", "Tierna pechuga de pollo a la plancha, acompañada de crujientes papas a la francesa y dulce plátano maduro. Y queso doble crema derretido por encima.", 27000, "", []),
     (PLATOS, "Gosa Gacuho", "Churrasco a la parrilla, acompañado de arepa, crujientes papas a la francesa, chimichurri y nuestra deliciosa salsa de la casa.", 28500, "", []),
+    (PLATOS, "Chuleta Gosa", "Chuleta de cerdo a la parrilla, acompañada de plátano maduro y papas a la francesa.", 27000, "", []),
+    (PLATOS, "Gosa Black Ribs", "Costillas BBQ ahumadas, acompañadas de plátano maduro y papas a la francesa.", 29000, "", []),
     # --- Adicionales ---
     (ADICIONALES, "Chimichurri", "", 3000, "", []),
     (ADICIONALES, "Queso Doble Crema", "", 2500, "", []),

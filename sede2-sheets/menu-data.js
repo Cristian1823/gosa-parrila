@@ -43,7 +43,9 @@ const MENU = {
         { id: "pl3", nombre: "Gosa Pork", precio: 24000 },
         { id: "pl4", nombre: "Gosa Bravio", precio: 25500 },
         { id: "pl5", nombre: "Gosa Gatrine", precio: 27000 },
-        { id: "pl6", nombre: "Gosa Gacuho", precio: 28500 }
+        { id: "pl6", nombre: "Gosa Gacuho", precio: 28500 },
+        { id: "pl7", nombre: "Chuleta Gosa", precio: 27000 },
+        { id: "pl8", nombre: "Gosa Black Ribs", precio: 29000 }
     ],
     adicionales: [
         { id: "a1", nombre: "Chimichurri", precio: 3000 },

@@ -89,7 +89,7 @@ Para trabajar en local sigue sirviendo Live Server sobre esta carpeta con su pro
 
 El cierre calcula la ganancia con las columnas `Costo`, `GastoOperativo` y `Sueldos` de la pestaña `Productos` (`Sueldos` = mano de obra por unidad vendida). Una celda vacía cuenta como 0.
 
-Los costos iniciales salen de la hoja de la sede 1 (`tools/costos_sede1.csv`) y se cruzaron **por categoría y nombre** (los IDs y precios de esa tabla no se usan). Quedó con costo 45 de los 55 productos. **Sin costo, para llenar a mano:** Bucaro, Salchi Bucara, los 6 Platos a la carta, Chimichurri y Queso Doble Crema.
+Los costos iniciales salen de la hoja de la sede 1 (`tools/costos_sede1.csv`) y se cruzaron **por categoría y nombre** (los IDs y precios de esa tabla no se usan). Quedó con costo 45 de los 57 productos. **Sin costo, para llenar a mano:** Bucaro, Salchi Bucara, los 8 Platos a la carta (incluidos Chuleta Gosa y Gosa Black Ribs), Chimichurri y Queso Doble Crema.
 
 ### Rellenar los costos en una hoja que ya existe
 
@@ -98,6 +98,14 @@ Si la pestaña `Productos` ya se creó (con los costos vacíos), no hace falta r
 2. Elige la función **`completarCostos`** y pulsa **Ejecutar**. El resultado queda en *Registro de ejecución* y dice cuántos productos completó y cuáles siguen sin costo.
 3. Es seguro repetirlo: **solo llena celdas vacías, nunca pisa un valor ya escrito**, y no toca productos que agregaste a mano.
 4. (Recomendado, para que el sitio use el mismo código) *Implementar → Administrar implementaciones → Editar → Versión: Nueva versión → Implementar*. La URL no cambia.
+
+### Agregar a la hoja los productos nuevos de la carta
+
+Cuando la carta suma productos (por ejemplo *Chuleta Gosa* y *Gosa Black Ribs*) y la pestaña `Productos` ya existe:
+1. Pega el `google-apps-script.js` actualizado en Apps Script y guarda.
+2. Ejecuta la función **`agregarProductosNuevos`**. Agrega **al final** de la hoja los productos que todavía no están, con costos vacíos (se llenan a mano).
+3. No modifica ni borra filas existentes, ni duplica un producto que ya exista con ese nombre, y se puede repetir sin riesgo. Opcional: *Implementar → Administrar implementaciones → Editar → Nueva versión*.
+4. Un `git push` a `main` actualiza el menú público solo; el sistema interno toma los productos de la hoja.
 
 ### Datos para revisar con el cliente
 
@@ -116,4 +124,4 @@ Se copiaron tal cual venían; estos se ven raros: Coca Cola 1.5 L, Coca Cola 0 1
 - Los PIN están en `config.js`, que es visible para quien abra el sitio. Frenan el uso casual, no a una persona con conocimientos técnicos.
 - La URL del backend no pide autenticación: quien la tenga puede leer y modificar pedidos. No la publiques ni la compartas.
 - El número de WhatsApp, el horario y la dirección del local no están definidos: se completan en `tools/generar_sede2.py` (constantes `WHATSAPP`, `HORARIO`, `DIRECCION`) y se regenera.
-- El logo dice "GOSA FOOD TRUCK"; falta definir si habrá uno propio del local.
+- El logo dice "GOSA FOOD TRUCK"; el cliente pidió cambiarlo y falta recibir el nuevo. Se reemplaza en `images/logo.jpeg` (ver CLAUDE.md, sección Logo).

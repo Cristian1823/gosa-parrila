@@ -50,6 +50,8 @@ var IDS_AHUMADOS = []; // Sede 2: sin línea Ahumados, todo se cuenta como 'gosa
     ["pl4", "Gosa Bravio", "platos", 25500, "", "", ""],
     ["pl5", "Gosa Gatrine", "platos", 27000, "", "", ""],
     ["pl6", "Gosa Gacuho", "platos", 28500, "", "", ""],
+    ["pl7", "Chuleta Gosa", "platos", 27000, "", "", ""],
+    ["pl8", "Gosa Black Ribs", "platos", 29000, "", "", ""],
     ["a1", "Chimichurri", "adicionales", 3000, "", "", ""],
     ["a2", "Queso Doble Crema", "adicionales", 2500, "", "", ""],
     ["a3", "Tocineta", "adicionales", 3500, 387, 0, ""],
@@ -113,6 +115,43 @@ var IDS_AHUMADOS = []; // Sede 2: sin línea Ahumados, todo se cuenta como 'gosa
     }
     var msg = 'Costos completados en ' + completados + ' productos.' +
       (sinCosto.length ? ' Sin costo (llenar a mano): ' + sinCosto.join(', ') + '.' : ' Todos los productos tienen costo.');
+    Logger.log(msg);
+    return msg;
+  }
+
+  // Ejecutar a mano (Ejecutar > agregarProductosNuevos) cuando la carta suma productos y la hoja Productos ya existe.
+  // Agrega AL FINAL de la hoja los productos de CATALOGO_INICIAL cuyo ID todavia no esta en la hoja.
+  // No modifica ni borra filas existentes (sus precios y costos quedan como estan) y no duplica un producto
+  // que ya exista con el mismo nombre. Se puede ejecutar varias veces sin riesgo.
+  function agregarProductosNuevos() {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Productos');
+    if (!sheet) return 'No existe la hoja Productos. Ejecuta configurarHojas primero.';
+
+    var data = sheet.getDataRange().getValues();
+    var porId = {};
+    var porNombre = {};
+    for (var i = 1; i < data.length; i++) {
+      porId[String(data[i][0]).trim()] = true;
+      porNombre[String(data[i][1]).trim().toLowerCase()] = true;
+    }
+
+    var nuevas = [];
+    var nombres = [];
+    var yaExisten = [];
+    CATALOGO_INICIAL.forEach(function(p) {
+      if (porId[String(p[0])]) return;
+      if (porNombre[String(p[1]).trim().toLowerCase()]) { yaExisten.push(p[1]); return; }
+      nuevas.push([p[0], p[1], p[2], p[3], p[4], p[5], true, p[6]]);
+      nombres.push(p[1]);
+    });
+
+    if (nuevas.length) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, nuevas.length, HOJAS['Productos'].length).setValues(nuevas);
+    }
+    var msg = nuevas.length
+      ? 'Productos agregados (' + nuevas.length + '): ' + nombres.join(', ') + '. Costos vacios: llenarlos a mano.'
+      : 'No habia productos nuevos: la hoja ya tiene todo el catalogo.';
+    if (yaExisten.length) msg += ' Omitidos por existir ya con ese nombre: ' + yaExisten.join(', ') + '.';
     Logger.log(msg);
     return msg;
   }
