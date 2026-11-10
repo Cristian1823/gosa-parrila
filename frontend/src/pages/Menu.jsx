@@ -47,21 +47,12 @@ export default function Menu() {
                 </button>
                 <div className="accordion-content">
                   {s.id === 'perros' && (
-                    <>
-                      <div className="info-bubble">
-                        <img src="/images/vaca.jpeg" alt="" className="info-bubble-img" />
-                        <div className="info-bubble-text">
-                          <span className="info-bubble-tag">¡ADICIÓN!</span>
-                          <p>Por solo <strong className="info-bubble-price">+$5.000</strong> disfruta tu perro con <strong>salchicha americana</strong></p>
-                        </div>
+                    <div className="info-bubble">
+                      <div className="info-bubble-text">
+                        <span className="info-bubble-tag">¡HAZLO COMBO!</span>
+                        <p>Con la <strong>bebida del día</strong> por solo <strong className="info-bubble-price">$6.500</strong> · con un producto <strong>Coca-Cola</strong> <strong>$8.000</strong> · con uno <strong>Postobón</strong> <strong>$7.500</strong></p>
                       </div>
-                      <div className="info-bubble">
-                        <div className="info-bubble-text">
-                          <span className="info-bubble-tag">¡HAZLO COMBO!</span>
-                          <p>Con la <strong>bebida del día</strong> por solo <strong className="info-bubble-price">$6.500</strong> · con un producto <strong>Coca-Cola</strong> <strong>$8.000</strong> · con uno <strong>Postobón</strong> <strong>$7.500</strong></p>
-                        </div>
-                      </div>
-                    </>
+                    </div>
                   )}
                   {s.id === 'bebidas' ? (
                     <div className="bebidas-content">

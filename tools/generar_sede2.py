@@ -174,12 +174,7 @@ def index_html(cats):
         else:
             burbuja = ""
             if c["clave"] == "perros":
-                adicional = next((i for cc in cats if cc["clave"] == "adicionales" for i in cc["items"] if i["nombre"] == "Salchicha Americana"), None)
-                precio_ad = money(adicional["precio"]) if adicional else ""
                 burbuja = (
-                    '<div class="info-bubble"><img src="images/vaca.jpeg" alt="" class="info-bubble-img">'
-                    '<div class="info-bubble-text"><span class="info-bubble-tag">¡ADICIÓN!</span>'
-                    f'<p>Por solo <strong class="info-bubble-price">+{precio_ad}</strong> disfruta tu perro con <strong>salchicha americana</strong></p></div></div>'
                     '<div class="info-bubble"><div class="info-bubble-text"><span class="info-bubble-tag">¡HAZLO COMBO!</span>'
                     '<p>Con la <strong>bebida del día</strong> por solo <strong class="info-bubble-price">$6.500</strong> · con un producto <strong>Coca-Cola</strong> <strong>$8.000</strong> · con uno <strong>Postobón</strong> <strong>$7.500</strong></p></div></div>'
                 )

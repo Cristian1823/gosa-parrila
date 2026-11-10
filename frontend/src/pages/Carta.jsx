@@ -65,10 +65,7 @@ export default function Carta() {
           <section key={s.id} className="c-sec">
             <h3 className={'c-band' + (BANDS.has(s.id) ? ' band-' + s.id : '')}>{s.title.toUpperCase()}</h3>
             {s.id === 'perros' && (
-              <>
-                <p className="c-note"><b>¡ADICIÓN!</b> Por solo <b>+$5.000</b> disfruta tu perro con salchicha americana</p>
-                <p className="c-note"><b>¡HAZLO COMBO!</b> Con la bebida del día por solo <b>$6.500</b> · con un producto Coca-Cola <b>$8.000</b> · con uno Postobón <b>$7.500</b></p>
-              </>
+              <p className="c-note"><b>¡HAZLO COMBO!</b> Con la bebida del día por solo <b>$6.500</b> · con un producto Coca-Cola <b>$8.000</b> · con uno Postobón <b>$7.500</b></p>
             )}
             <div className={'c-cols' + (COMPACT.has(s.id) ? ' compact' : '')}>
               {s.list.map((i) =>

@@ -39,7 +39,7 @@ backend/
 frontend/
   public/logo.jpg  logo horizontal "GOSA PARRILLA" (recortado); favicon.png = la "G"
 assets/            logo-gosa-parrilla-original.jpeg: el archivo original que entregó el cliente (1536x1024)
-  public/images/   fondos de categoría, bebidas.jpeg, vaca.jpeg
+  public/images/   fondos de categoría y bebidas.jpeg
   src/main.jsx     rutas
   src/lib.js       api, money, usePolling, slug, groupMenu
   src/styles.css   tokens de marca + POS + menú digital
@@ -93,7 +93,7 @@ API: `GET /api/menu`, `POST /api/orders`, `GET /api/orders`, `PATCH /api/orders/
 
 ### Precios vigentes (nov 2026)
 
-- Base: PDF del cliente. Luego el cliente pidió **+$1.000 a todos los productos excepto las hamburguesas** (ya aumentadas antes): se aplicó a Entradas, Perros, Salchipapas, Platos a la carta, Adicionales y **Bebidas** (la nota del combo $6.500/$8.000/$7.500 **no** se tocó; la burbuja de salchicha americana quedó en $5.000 = precio del adicional). Hamburguesas: +$1.000 en sencilla, doble y triple.
+- Base: PDF del cliente. Luego el cliente pidió **+$1.000 a todos los productos excepto las hamburguesas** (ya aumentadas antes): se aplicó a Entradas, Perros, Salchipapas, Platos a la carta, Adicionales y **Bebidas** (la nota del combo $6.500/$8.000/$7.500 **no** se tocó). Hamburguesas: +$1.000 en sencilla, doble y triple.
 - `user_version` actual: **8**. Los dos últimos Platos (`Chuleta Gosa` $27.000 y `Gosa Black Ribs` $29.000, IDs `pl7` y `pl8`) se agregaron con el precio que dio el cliente, sin el +$1.000, y van **al final** de la categoría para no mover los IDs existentes (los IDs son por orden dentro de la categoría: insertar a la mitad rompe la correspondencia con la hoja de Google).
 
 ### Sistema en Google Sheets (fase 1)
@@ -123,7 +123,7 @@ Tokens en `:root` de `src/styles.css`, idénticos a la sede 1:
 - Fondo `#000`, panel `#141414`, dorado `#FFD700` / `#FFC107`, texto `#fff`, gris claro `#E0E0E0`, bordes `#4B4B4B`, éxito `#28a745`, aviso/naranja `#ff6b35`.
 - Tipografías: **Bebas Neue** (títulos, precios, botones) + **Inter** (texto).
 - Logo horizontal "GOSA PARRILLA" (dorado sobre negro, sin marco circular) y marca de agua al 5 % de fondo; tarjetas con barrido dorado al hover; etiquetas dorado inclinadas -2°; precios en pastilla gris; botones con gradiente dorado; chips en forma de pastilla.
-- Menú digital: acordeón por categoría con foto de cabecera (90 px, velo oscuro 45 %) y mismos iconos Font Awesome. Perros lleva dos burbujas: "¡ADICIÓN! +$4.000 salchicha americana" y "¡HAZLO COMBO!" (bebida del día $6.500, Coca-Cola $8.000, Postobón $7.500). Platos a la carta usa como cabecera la foto de parrilla (`fondo-platos.jpeg`).
+- Menú digital: acordeón por categoría con foto de cabecera (90 px, velo oscuro 45 %) y mismos iconos Font Awesome. Perros lleva una burbuja "¡HAZLO COMBO!" (bebida del día $6.500, Coca-Cola $8.000, Postobón $7.500); la burbuja "¡ADICIÓN! +$5.000 salchicha americana" (con la imagen de la vaca) se **retiró** por pedido del cliente (nov 2026). Platos a la carta usa como cabecera la foto de parrilla (`fondo-platos.jpeg`).
 - Carta impresa: hoja Letter, dos columnas, `break-inside: avoid` por categoría (hoy 3 páginas: Entradas+Perros / Hamburguesas+Salchipapas+Platos a la carta / Adicionales+Bebidas). Requiere "Gráficos de fondo" activado al imprimir.
 
 ## Pendientes / hoja de ruta
